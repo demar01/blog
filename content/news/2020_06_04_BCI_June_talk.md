@@ -10,4 +10,4 @@ I delivered a talk at BCI Thursday seminar series on our work on regulation of r
 
 In this work published in [bioarxiv]() I demonstrated how a RBP called LARP6  regulates  ribosome biogenesis in migrating cells. You could watch the full talk (QMUL access only) [here](https://bcinet.qmcr.qmul.ac.uk/thursday-seminar-series-webinar-archive/)
 
-![image](/img/BCItalk.png)
+![image](https://raw.githubusercontent.com/demar01/blog/master/static/img/BCItalk.png)
