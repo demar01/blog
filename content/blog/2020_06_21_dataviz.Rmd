@@ -15,13 +15,13 @@ I did not attend to [rstudioconf-2020](https://rstudio.com/resources/rstudioconf
 
 I start from the premise that any plotting should be done with ggplot2. I find that starting with tidy data is the main benefit of ggplot2.
 
-![_Three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells_](/img/tidy-data.png)
+![_Three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells_](https://raw.githubusercontent.com/demar01/blog/master/static/img/tidy-data.png)
 
 In that talk, Will 
 
 I am going to explore cute **palmerpenguins**, and interesting alternative to the iris dataset. It has measurements for penguin species, island in Palmer Archipelago, size (flipper length, body mass, bill dimensions), and sex.
 
-![Penguins Dataset Overview](/img/penguins-of-the-world.jpeg)
+![Penguins Dataset Overview](https://raw.githubusercontent.com/demar01/blog/master/static/img/penguins-of-the-world.jpeg)
 
 # Install package
 
