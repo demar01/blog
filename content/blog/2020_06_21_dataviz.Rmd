@@ -13,7 +13,8 @@ I start from the premise that any plotting should be done with ggplot2. I find t
 
 ![_Three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells_](https://raw.githubusercontent.com/demar01/blog/master/static/img/tidy-data.png)
 
-In that talk, Will 
+In that talk, Will talked how we should build graphics using the three layers of grammar but thing about the three layers of glamour
+![](https://raw.githubusercontent.com/demar01/blog/master/static/img/pglamour.jpeg)
 
 I am going to explore cute **palmerpenguins**, and interesting alternative to the iris dataset. It has measurements for penguin species, island in Palmer Archipelago, size (flipper length, body mass, bill dimensions), and sex.
 
