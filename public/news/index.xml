@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>News on Maria Dermit</title>
+    <link>/news/</link>
+    <description>Recent content in News on Maria Dermit</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 12 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/news/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Mardakheh website</title>
+      <link>/news/2020_06_12_mardakhlanwebsite/</link>
+      <pubDate>Fri, 12 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_06_12_mardakhlanwebsite/</guid>
+      <description> The Mardakheh lab website is live! https://t.co/9VA5GFg2fn
+&amp;mdash; Maria Dermit (@DermitMaria) June 12, 2020  </description>
+    </item>
+    
+    <item>
+      <title>BCI Webinars</title>
+      <link>/news/2020_06_04_bci_june_talk/</link>
+      <pubDate>Thu, 04 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_06_04_bci_june_talk/</guid>
+      <description>Making ribosomes to translate cancer I delivered a talk at BCI Thursday seminar series on our work on regulation of ribosome biogenesis by subcellular RNA localization.
+In this work published in bioarxiv I demonstrated how a RBP called LARP6 regulates ribosome biogenesis in migrating cells. You could watch the full talk (QMUL access only) here</description>
+    </item>
+    
+    <item>
+      <title>RNA2020</title>
+      <link>/news/2020_05_26_rna2020/</link>
+      <pubDate>Tue, 26 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_05_26_rna2020/</guid>
+      <description>RNA2020 On RNA2020 I presented our CLIF (cross-linking and fractionation) method to analyse subcellular localization patterns of human RNA and proteins.</description>
+    </item>
+    
+    <item>
+      <title>WFH Weekly Bulletin</title>
+      <link>/news/2020_05_13_wfh_weekly_bulletin/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_05_13_wfh_weekly_bulletin/</guid>
+      <description>Q&amp;amp;A with Maria Dermit This week I answered some questions for the WFH Weekly Bulletin 📰. I have been fundraising for CRUK as part of the BCI Running Team.
+If you want to join us or donate, please visit.</description>
+    </item>
+    
+    <item>
+      <title>IWD</title>
+      <link>/news/2020_03_08_iwd/</link>
+      <pubDate>Sun, 08 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_03_08_iwd/</guid>
+      <description>WomenInScience On IWD I talked with @QMBCI and sayed what IWD means to me
+Happy #InternationalWomensDay!</description>
+    </item>
+    
+    <item>
+      <title>RNAUK2020</title>
+      <link>/news/2020_01_25_rnauk2020/</link>
+      <pubDate>Sat, 25 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/news/2020_01_25_rnauk2020/</guid>
+      <description>RNA2020 On RNAUK2020 I presented our results on subcellular localization of RP-mRNAs to protrusions.</description>
+    </item>
+    
+  </channel>
+</rss>

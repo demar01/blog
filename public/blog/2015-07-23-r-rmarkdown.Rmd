@@ -1,0 +1,26 @@
+---
+title: "Rblogdown"
+author: "Maria Dermit"
+date: 2020-06-21
+categories: ["R"]
+tags: ["Rblogdown","Hugo", "Netlify"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+# How I set up this website
+
+The purpose of this post is to show the simple steps how I created this website using Github, Hugo, Rblogdown and Netfily. 
+
+
+1. First I create a new repo on my GitHub 
+
+2. Then I downloaded [Hugo](https://gohugo.io), a static site generator and got familiar with the way the information is distributed across folders. I also realise how important choosing the right theme for your purpose is. In my case I wanted something simple, although I found the "hugo-academic" being very popular in academia and gives you load of flexibility. I found [this](https://gohugo.io/getting-started/quick-start/) and [this](http://www.pik-potsdam.de/~pichler/blog/post/set-this-up/setting-up-this-site/) links particularly useful.
+
+3. Download Rblogdown package and I genually get to know a bit about about [link](https://bookdown.org/yihui/blogdown/) great project by Yihui Xi.
+
+4. Use [Netlify](https://app.netlify.com/) to deploy the content of the web into the public domain. I followed [this](https://www.youtube.com/watch?v=syWAKaj-4ck)
+
+Website is ready to go!

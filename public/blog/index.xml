@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog on Maria Dermit</title>
+    <link>/blog/</link>
+    <description>Recent content in Blog on Maria Dermit</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Tue, 23 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Dataviz</title>
+      <link>/blog/dataviz/</link>
+      <pubDate>Tue, 23 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/dataviz/</guid>
+      <description>FANTASTIC talk on DataViz I did not attend to rstudioconf-2020, but I engaged the #rstudioconf2020 watch many of the talks. One of them I particularly loved was “The glamour of Graphic” by Will Chase. As he sayed in his talk, once you learnt certain things, you cannot stop noticing where those amazing trick are not being used, and I find this to be so true for dataviz!
+I start from the premise that any plotting should be done with ggplot2.</description>
+    </item>
+    
+    <item>
+      <title>Rblogdown</title>
+      <link>/blog/rblogdown/</link>
+      <pubDate>Sun, 21 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/rblogdown/</guid>
+      <description>How I set up this website The purpose of this post is to show the simple steps how I created this website using Github, Hugo, Rblogdown and Netfily.
+First I create a new repo on my GitHub
+ Then I downloaded Hugo, a static site generator and got familiar with the way the information is distributed across folders. I also realise how important choosing the right theme for your purpose is.</description>
+    </item>
+    
+  </channel>
+</rss>

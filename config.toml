@@ -1,0 +1,52 @@
+#baseurl = "https://wonderful-wing-55d1de.netlify.app/"
+
+title="Maria Dermit"
+
+theme = "cocoa-eh-hugo-theme"
+builddrafts = true
+canonifyurls = true
+contentdir = "content"
+languageCode = "en-US"
+layoutdir = "layouts"
+publishdir = "public"
+googleAnalytics = ""
+author = "Maria D"
+#title = "Cocoa Enhanced"
+disqusshortname = ""
+pluralizelisttitles = false
+disableKinds = ["taxonomy", "taxonomyTerm"]
+enableEmoji = true
+
+[permalinks]
+blog = "blog/:slug/"
+
+[params]
+dateform = "Jan 2, 2006"
+dateformfull = "Mon Jan 2 2006 15:04:05 MST"
+description = "A blog by Maria Dermit"
+copyright = "Copyright © 2020-{year} Maria Dermit"
+# copyrightUrl = "https://creativecommons.org/licenses/by-sa/4.0/"
+logofile = "img/demar01.jpeg"
+faviconfile = "img/ribo.jpeg"
+highlightjs = true
+share = true
+role = "Researcher"
+gravatar = true
+avatar = "img/ribo.jpeg"
+# Share to googleplus, twitter, fb, linkedin by default
+# disable by setting share_on_<social network> = false
+# example: share_on_googleplus = false
+highlightjsVersion = "9.11.0"
+highlightjsCDN = "https://cdn.bootcss.com"
+highlightjsLang = ["r", "yaml"]
+highlightjsTheme = "github"
+progressively = true
+latestpostcount = 5
+github = "demar01"
+email = "maria.dermit@qmul.ac.uk"
+twitter = "dermitmaria"
+posts_navigation = true
+# issoHost = "comments.domain.tld:1234"
+# githubRepo = "githubUsername/repositoryName/tree/master"
+small_banner_logo = true
+social_banner = "img/ribo.jpeg"

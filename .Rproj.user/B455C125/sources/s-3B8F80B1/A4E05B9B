@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592929545012.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A4E05B9B",
+    "lastKnownWriteTime" : 1592929752,
+    "last_content_update" : 1592929752338,
+    "path" : "~/Downloads/blog/content/blog/2020_06_21_dataviz.Rmd",
+    "project_path" : "content/blog/2020_06_21_dataviz.Rmd",
+    "properties" : {
+        "cursorPosition" : "46,0",
+        "scrollLine" : "28"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

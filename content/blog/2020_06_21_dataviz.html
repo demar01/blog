@@ -1,0 +1,73 @@
+---
+title: "Dataviz"
+output: html_document
+date: "2020-06-23"
+
+---
+
+
+
+<div id="fantastic-talk-on-dataviz" class="section level1">
+<h1>FANTASTIC talk on DataViz</h1>
+<p>I did not attend to <a href="https://rstudio.com/resources/rstudioconf-2020/">rstudioconf-2020</a>, but I engaged the #rstudioconf2020 watch many of the talks. One of them I particularly loved was <strong>“The glamour of Graphic”</strong> by <a href="https://rstudio.com/resources/rstudioconf-2020/the-glamour-of-graphics/">Will Chase</a>. As he sayed in his talk, once you learnt certain things, you cannot stop noticing where those amazing trick are not being used, and I find this to be so true for dataviz!</p>
+<p>I start from the premise that any plotting should be done with ggplot2. I find that starting with tidy data is the main benefit of ggplot2.</p>
+<div class="figure">
+<img src="/img/tidy-data.png" alt="Three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells" />
+<p class="caption"><em>Three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells</em></p>
+</div>
+<p>In that talk, Will</p>
+<p>I am going to explore cute <strong>palmerpenguins</strong>, and interesting alternative to the iris dataset. It has measurements for penguin species, island in Palmer Archipelago, size (flipper length, body mass, bill dimensions), and sex.</p>
+<div class="figure">
+<img src="/img/penguins-of-the-world.jpeg" alt="Penguins Dataset Overview" />
+<p class="caption">Penguins Dataset Overview</p>
+</div>
+</div>
+<div id="install-package" class="section level1">
+<h1>Install package</h1>
+</div>
+<div id="loading-library" class="section level1">
+<h1>Loading Library</h1>
+<pre class="r"><code>library(tidyverse)
+library(dplyr)
+library(palmerpenguins)
+library(skimr)
+library(janitor) # this is to have clean names</code></pre>
+<p>One observation is that there are missing values, which are not present in the iris dataset. Let’s count where the missing values are</p>
+<pre class="r"><code>penguins %&gt;%
+  # dplyr::select(everything()) %&gt;%
+  summarise_all(funs(sum(is.na(.)))) %&gt;%
+  pivot_longer(cols = 1:7, names_to = &quot;columns&quot;, values_to = &quot;NA_count&quot;) %&gt;%
+  mutate_if(is.character, as.factor) %&gt;%
+  mutate(columns = fct_reorder(columns, NA_count)) %&gt;%
+  ggplot(aes(y = columns, x = NA_count)) +
+  geom_col(fill = &quot;darkorange&quot;) +
+  geom_label(aes(label = NA_count)) +
+  #   scale_fill_manual(values = c(&quot;darkorange&quot;,&quot;purple&quot;,&quot;cyan4&quot;)) +
+  theme_classic() +
+  labs(
+    title = &quot;Penguins - NA Count&quot;,
+    subtitle = &quot;Aesthetic fixes&quot;, caption = &quot;Graphic:
+     @dermitmaria\nData:Penguins&quot;
+  ) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;
+  )</code></pre>
+<p><img src="/blog/2020_06_21_dataviz_files/figure-html/plot-1.png" width="2400" /></p>
+<ol style="list-style-type: decimal">
+<li>Things that I learnt on that course and applied on this plot:
+<ul>
+<li>Descending order</li>
+<li>Left-aligned text</li>
+<li>Remove labels</li>
+</ul></li>
+<li>Things that I learnt on that course but have not applied on this plot:
+<ul>
+<li>The importance of good font.</li>
+<li>Clean names</li>
+<li>Remove white spaces</li>
+</ul></li>
+</ol>
+</div>

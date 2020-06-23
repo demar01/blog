@@ -1,0 +1,24 @@
+---
+title: "Rblodgwon"
+author: "Maria Dermit "
+date: 2015-06-22
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+# How I set up this website
+
+The purpose of this post is to show the simple steps how I created this website using Github, Hugo, Rblogdown and Netfily. 
+
+1. First I create a new repo on my github 
+
+2. Then I downloaded [Hugo](https://gohugo.io), a static site generator and got familiar with the way the information is distributed across folders. Also, the importance of choosing the right theme for your purpose. In my case I wanted something simple, but for acedemia "Acedemi" is very popular and gives you load of flexibility. I found this, this and these links particularly useful.
+
+3. Download Rblogdown package and I genually get to know a bit about about this project Yihui Xi this link
+
+4. Use Netlify to deploy the content of the web into the public domain. 
+
