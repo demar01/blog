@@ -9,4 +9,4 @@ title: WFH Weekly Bulletin
 This week I answered some questions for the WFH Weekly Bulletin :newspaper:. I have been fundraising for CRUK as part of the BCI Running Team.  
 If you want to join us or donate, please [visit](https://www.justgiving.com/team/RunningforResearch).
 
-![image](/img/WFH-QA-Maria-Dermit.png)
+![image](https://raw.githubusercontent.com/demar01/blog/master/static/img/WFH-QA-Maria-Dermit.png)
