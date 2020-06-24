@@ -20,7 +20,9 @@ In order to know what messages are being twitted by UK's PM I analysed his timel
 
 ```{r}
 bj <- get_timeline("BorisJohnson", n = 3200)
-m<-bj %>% filter(is_retweet=="FALSE") %>% pull(hashtags)  %>% unlist() %>% table() %>% names()
+m<-bj %>% filter(is_retweet=="FALSE") %>% pull(hashtags)  %>% 
+unlist() %>% table() %>% names()
+
 v<-bj %>% filter(is_retweet=="FALSE") %>% pull(hashtags)  %>% unlist() %>% table() %>% as.numeric()
 d<-data.frame(m,v) %>% arrange(v)
 wordcloud(words = d$m, freq = d$v, min.freq = 1,
