@@ -9,7 +9,8 @@ categories: ["R"]
 
 <div id="uk-goverment-message" class="section level2">
 <h2>UK goverment message</h2>
-<p>In order to know</p>
+<p>In order to know what messages are being twitted by UK's PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.
+</p>
 <pre class="r"><code>bj &lt;- get_timeline(&quot;BorisJohnson&quot;, n = 3200)
 m&lt;-bj %&gt;% filter(is_retweet==&quot;FALSE&quot;) %&gt;% pull(hashtags)  %&gt;% unlist() %&gt;% table() %&gt;% names()
 v&lt;-bj %&gt;% filter(is_retweet==&quot;FALSE&quot;) %&gt;% pull(hashtags)  %&gt;% unlist() %&gt;% table() %&gt;% as.numeric()
