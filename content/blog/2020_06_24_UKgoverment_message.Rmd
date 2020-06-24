@@ -28,6 +28,6 @@ d<-data.frame(m,v) %>% arrange(v)
 wordcloud(words = d$m, freq = d$v, min.freq = 3,scale = c(3, 0.5),
           max.words=300, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
-          ![](blog/blogdown/blog/2020_06_24_UKgoverment_message_files/figure-html/unnamed-chunk-1-1.png)
+          ![](https://github.com/demar01/blog/edit/master/content/blog/blogdown/blog/2020_06_24_UKgoverment_message_files/figure-html/unnamed-chunk-1-1.png)
 ```
 
