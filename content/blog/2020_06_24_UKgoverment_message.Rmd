@@ -16,7 +16,8 @@ library(rtweet)
 ```
 ## UK goverment message
 
-In order to know 
+In order to know what messages are being twitted by UK's PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.
+
 ```{r}
 bj <- get_timeline("BorisJohnson", n = 3200)
 m<-bj %>% filter(is_retweet=="FALSE") %>% pull(hashtags)  %>% unlist() %>% table() %>% names()
