@@ -50,3 +50,4 @@ posts_navigation = true
 # githubRepo = "githubUsername/repositoryName/tree/master"
 small_banner_logo = true
 social_banner = "img/ribo.jpeg"
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
