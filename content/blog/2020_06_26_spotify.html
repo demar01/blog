@@ -1,0 +1,130 @@
+---
+title: "Spotify"
+author: "Maria Dermit"
+date: 2020-06-26
+categories: ["R"]
+---
+
+
+
+<pre class="r"><code>library(dplyr)
+library(spotifyr)
+library(plotly)
+library(ggplot2)
+library(ggjoy)
+library(ggpubr)
+library(rstatix)
+library(wesanderson)
+library(GGally)</code></pre>
+<div id="motivation-to-do-this-comparison" class="section level1">
+<h1>Motivation to do this comparison</h1>
+<p>It is always a joke in my lab that Martin listens to better music than what I do. I find this utterly non-sense! To demonstrate my point, I analyse two artist Martin and I really like: on my case Rosalia and on Martin’s case The bouncing Souls. I took this information from his lab Spotify playlist.</p>
+<div id="steps-to-do-these-analyses" class="section level2">
+<h2>Steps to do these analyses</h2>
+<div id="first-i-get-my-client-id-from-spotify" class="section level3">
+<h3>First I get my client ID from Spotify</h3>
+<p>In <a href="Homedeveloper.spotify.com">Spotify for Developers</a> I get my client id</p>
+<pre class="r"><code>Sys.setenv(SPOTIFY_CLIENT_ID = id)
+Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
+access_token &lt;- get_spotify_access_token()</code></pre>
+</div>
+<div id="then-i-get-features-for-both-artists" class="section level3">
+<h3>Then I get features for both artists</h3>
+<pre class="r"><code># Maria Music:Rosalia
+maria_playlist &lt;- get_playlist_audio_features(playlist_uris = &#39;37i9dQZF1DXbjiU2ByCldP&#39;)
+maria_playlist$researcher &lt;- paste(&quot;maria&quot;)
+
+#Martin Music: bouncing souls
+martin_playlist &lt;- get_playlist_audio_features(playlist_uris = &#39;37i9dQZF1DZ06evO1WZiOk&#39;)
+martin_playlist$researcher &lt;- paste(&quot;martin&quot;)
+
+lab_music &lt;- rbind(maria_playlist, martin_playlist)</code></pre>
+</div>
+<div id="overview-of-interesting-features-for-each-researcher" class="section level3">
+<h3>Overview of interesting features for each researcher</h3>
+<pre class="r"><code>lab_music %&gt;% 
+  select(researcher,loudness,danceability, track.popularity) %&gt;% 
+  ggpairs(mapping = aes(color=researcher))</code></pre>
+<p><img src="/blog/2020_06_26_spotify_files/figure-html/unnamed-chunk-5-1.png" width="800" />
+It looks like I listen to more popular and danceable music, and Martin’s music is louder than mine. According to Spotify, <em>Danceability: describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable</em>. This really comes at not surprise.</p>
+<p>But the question is are the songs that I listen to is this difference in popularity significant?</p>
+</div>
+</div>
+<div id="how-popular-is-the-music-martin-and-i-listen-to" class="section level2">
+<h2>How popular is the music Martin and I listen to?</h2>
+<pre class="r"><code>p_value&lt;-lab_music %&gt;% 
+  summarize(results = wilcox.test(track.popularity ~ researcher)$p.value) 
+stat.test &lt;- lab_music %&gt;% 
+  wilcox_test(track.popularity ~ researcher, paired = FALSE) 
+
+lab_music %&gt;% 
+  mutate_if(is.character,as.factor) %&gt;% 
+  ggplot(aes(researcher,track.popularity, fill = researcher)) + 
+  geom_boxplot() +
+  geom_point()+
+  xlab(&quot;&quot;) +
+  ylab(&quot;Popularity&quot;) +
+    geom_signif(annotations = stat.test$p,
+              y_position = 95, xmin=1, xmax=2) +
+  #stat_pvalue_manual(stat.test, x=researcher,label = &quot;p&quot;) +
+  theme_classic()+
+    theme(plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;, legend.position = &quot;none&quot;)+
+  labs(title = &#39;Popularity of song&#39;,
+ caption = &quot;Maria-Rosalia\nMartin-The bouncing Souls&quot;)+
+  scale_fill_manual(values = wes_palette(&quot;Royal1&quot;))</code></pre>
+<p><img src="/blog/2020_06_26_spotify_files/figure-html/unnamed-chunk-6-1.png" width="800" />
+I listen to music that is more popular.</p>
+</div>
+<div id="how-danceable-is-the-music-martin-and-i-listen-to" class="section level2">
+<h2>How danceable is the music Martin and I listen to?</h2>
+<pre class="r"><code>p_value&lt;-lab_music %&gt;% 
+  summarize(results = wilcox.test(danceability ~ researcher)$p.value) 
+stat.test &lt;- lab_music %&gt;% 
+  wilcox_test(danceability ~ researcher, paired = FALSE) 
+
+lab_music %&gt;% 
+  mutate_if(is.character,as.factor) %&gt;% 
+  ggplot(aes(researcher,danceability, fill = researcher)) + 
+  geom_boxplot() +
+  geom_point()+
+  xlab(&quot;&quot;) +
+  ylab(&quot;Danceability&quot;) +
+    geom_signif(annotations = stat.test$p,
+              y_position = 0.95, xmin=1, xmax=2) +
+  #stat_pvalue_manual(stat.test, x=researcher,label = &quot;p&quot;) +
+  theme_classic()+
+    theme(plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;, legend.position = &quot;none&quot;)+
+  labs(title = &#39;Danceability of song&#39;,
+ caption = &quot;Maria-Rosalia\nMartin-The bouncing Souls&quot;)+
+  scale_fill_manual(values = wes_palette(&quot;Royal1&quot;))</code></pre>
+<p><img src="/blog/2020_06_26_spotify_files/figure-html/unnamed-chunk-7-1.png" width="800" />
+I listen to music that is more danceable.</p>
+</div>
+<div id="how-loud-is-the-music-martin-and-i-listen-to" class="section level2">
+<h2>How loud is the music Martin and I listen to?</h2>
+<pre class="r"><code>p_value&lt;-lab_music %&gt;% 
+  summarize(results = wilcox.test(loudness ~ researcher)$p.value) 
+stat.test &lt;- lab_music %&gt;% 
+  wilcox_test(loudness ~ researcher, paired = FALSE) 
+lab_music %&gt;% 
+  mutate_if(is.character,as.factor) %&gt;% 
+  ggplot(aes(researcher,loudness, fill = researcher)) + 
+  geom_boxplot() +
+  geom_point()+
+  xlab(&quot;&quot;) +
+  ylab(&quot;Loudness&quot;) +
+    geom_signif(annotations = stat.test$p,
+              y_position = 0.95, xmin=1, xmax=2) +
+  #stat_pvalue_manual(stat.test, x=researcher,label = &quot;p&quot;) +
+  theme_classic()+
+    theme(plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;, legend.position = &quot;none&quot;)+
+  labs(title = &#39;Loudness of song&#39;,
+ caption = &quot;Maria-Rosalia\nMartin-The bouncing Souls&quot;)+
+  scale_fill_manual(values = wes_palette(&quot;Royal1&quot;))</code></pre>
+<p><img src="/blog/2020_06_26_spotify_files/figure-html/unnamed-chunk-8-1.png" width="800" />
+Interesting. Songs that Martin listens to are louder that the songs that I listen to. I found this tendency called <a href="https://en.wikipedia.org/wiki/Loudness_war">Loudness war</a> of music, the trend of increasing audio levels in recorded music, which reduces audio fidelity, and according to many critics, listener enjoyment. Has Martin fall into this trick and that is the reason he likes his music?</p>
+</div>
+</div>
