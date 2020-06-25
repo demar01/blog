@@ -1,0 +1,11 @@
+base
+dplyr
+spotifyr
+ggplot2
+plotly
+ggridges
+ggjoy
+ggpubr
+rstatix
+wesanderson
+GGally
