@@ -96,8 +96,9 @@ dataset %>%
 ```
 
 ## Conlusions
-It looks like there are some countries with more polarised views on Diversity such as Indonesia and South Korea, and other countries such as Hungary and Poland where diversity is not considered as neither/either a good thing or a bad thing. 
+It looks like there are some countries with more polarised views on Diversity such as Indonesia and South Korea, and other countries such as Hungary and Poland where diversity is  considered as neither a good or a bad thing. 
 
-Interestingly, some countries consider diversity mostly as a bad thing (such as Greece and Nigeria).
+Interestingly, some countries consider diversity mostly as a bad thing(such as Greece and Nigeria).
 
-In the survey, there are several factors analysed such as education, religion, income etc, and those factors are associated with some of the replies of this survey.  
+There are several other factors analysed in the survey such as education, religion, income etc, and those factors are associated with some of the replies of this survey.  
+© 2020 GitHub, Inc.
