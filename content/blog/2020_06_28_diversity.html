@@ -11,7 +11,7 @@
 
 <meta name="author" content="Maria Dermit" />
 
-<meta name="date" content="2020-06-28" />
+<meta name="date" content="2020-06-27" />
 
 <title>Diversity</title>
 
@@ -401,13 +401,13 @@ library(emo) # for rainbows and unicorns</code></pre>
 </div>
 <div id="data-visualization" class="section level3">
 <h3>Data visualization</h3>
-<pre class="r"><code>dataset %&gt;% 
-  select(diversity20yr_fu,COUNTRY) %&gt;% 
-  group_by(COUNTRY,diversity20yr_fu) %&gt;% 
+<pre class="r"><code>dataset %&gt;%
+  select(diversity20yr_fu,COUNTRY) %&gt;%
+  group_by(COUNTRY,diversity20yr_fu) %&gt;%
   tally  %&gt;%
   group_by(COUNTRY) %&gt;%
-  mutate(pct=(100*n)/sum(n)) %&gt;% 
-  filter(diversity20yr_fu %in% c(&quot;Good thing&quot;,&quot;Bad thing&quot;)) %&gt;% 
+  mutate(pct=(100*n)/sum(n)) %&gt;%
+  filter(diversity20yr_fu %in% c(&quot;Good thing&quot;,&quot;Bad thing&quot;)) %&gt;%
   ggplot(aes(pct,fct_reorder(COUNTRY,pct,.fun=max),label=paste0(round(pct, 0), &quot;%&quot;))) +
   geom_segment(aes( xend = pct, yend = COUNTRY)) +
   geom_point(aes(color = diversity20yr_fu),size = 5) +
@@ -416,7 +416,7 @@ library(emo) # for rainbows and unicorns</code></pre>
   scale_x_continuous(labels =function(l) {
     paste0(l,&quot;%&quot;)}, limits=c(0,100)) +
   #geom_text(aes(label = diversity20yr_fu, size = 8, vjust =-1)) +
-  geom_text(aes(x = 8, y = &quot;Indonesia&quot;, label = &quot;Bad thing&quot;), 
+  geom_text(aes(x = 8, y = &quot;Indonesia&quot;, label = &quot;Bad thing&quot;),
   color = wes_palette(&quot;Royal1&quot;)[2], size = 4, family = &quot;&quot;, vjust = 2) +
   geom_text(aes(x = 85, y = &quot;Indonesia&quot;, label = &quot;Good thing&quot;),
   color = wes_palette(&quot;Royal1&quot;)[1], size = 4, family = &quot;&quot;, vjust = 2) +
