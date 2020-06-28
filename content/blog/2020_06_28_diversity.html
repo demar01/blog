@@ -1,0 +1,83 @@
+---
+title: "Diversity"
+author: "Maria Dermit"
+date: 2020-06-27
+categories: ["R"]
+---
+
+
+
+<pre class="r"><code>library(tidyverse)
+library(scales)
+library(foreign) # this package allows reading of .sav files
+library(wesanderson)
+library(ggrepel)
+library(pewmethods) #this package allows exploration of Pew Research Center survey data
+library(emo) # for rainbows and unicorns</code></pre>
+<div id="motivation-to-do-this-comparison" class="section level1">
+<h1>Motivation to do this comparison</h1>
+<p>Given that we are in pride month 🌈, I came across this <a href="Thttps://www.pewresearch.org/global/2020/06/25/global-divide-on-homosexuality-persists/">article</a>, where it was really great to see increase trend for homosexuality, and not so great to see low accpetance in some regions.</p>
+<p><img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/PG_2020.06.25_Global-Views-Homosexuality_0-01.png" /></p>
+<p>I decided to use this great dataset to see by myself the trends towards diversity over the past two decades.</p>
+<div id="steps-to-do-these-analyses" class="section level2">
+<h2>Steps to do these analyses</h2>
+<div id="data-collection" class="section level3">
+<h3>Data Collection</h3>
+<p>I got the data from <a href="https://www.pewresearch.org/global/datasets/">Pew Research Centre</a></p>
+</div>
+<div id="the-question-i-want-to-explore-is-how-is-diversity-perceived-across-different-countries" class="section level3">
+<h3>The question I want to explore is: how is diversity perceived across different countries</h3>
+<p>This is the question is located the survey dataset</p>
+<pre class="r"><code>get_spss_label(dataset, 10)</code></pre>
+<pre><code>## [1] &quot;Q8. Do you think this is a good thing or a bad thing for (survey country)?&quot;</code></pre>
+<pre class="r"><code>names(dataset)[10]</code></pre>
+<pre><code>## [1] &quot;diversity20yr_fu&quot;</code></pre>
+</div>
+<div id="data-visualization" class="section level3">
+<h3>Data visualization</h3>
+<pre class="r"><code>dataset %&gt;% 
+  select(diversity20yr_fu,COUNTRY) %&gt;% 
+  group_by(COUNTRY,diversity20yr_fu) %&gt;% 
+  tally  %&gt;%
+  group_by(COUNTRY) %&gt;%
+  mutate(pct=(100*n)/sum(n)) %&gt;% 
+  filter(diversity20yr_fu %in% c(&quot;Good thing&quot;,&quot;Bad thing&quot;)) %&gt;% 
+  ggplot(aes(pct,fct_reorder(COUNTRY,pct,.fun=max),label=paste0(round(pct, 0), &quot;%&quot;))) +
+  geom_segment(aes( xend = pct, yend = COUNTRY)) +
+  geom_point(aes(color = diversity20yr_fu),size = 5) +
+  geom_text(color = &quot;white&quot;, size = 2)+
+  scale_color_manual(values = wes_palette(&quot;Royal1&quot;))+
+  scale_x_continuous(labels =function(l) {
+    paste0(l,&quot;%&quot;)}, limits=c(0,100)) +
+  #geom_text(aes(label = diversity20yr_fu, size = 8, vjust =-1)) +
+  geom_text(aes(x = 8, y = &quot;Indonesia&quot;, label = &quot;Bad thing&quot;), 
+  color = wes_palette(&quot;Royal1&quot;)[2], size = 4, family = &quot;&quot;, vjust = 2) +
+  geom_text(aes(x = 85, y = &quot;Indonesia&quot;, label = &quot;Good thing&quot;),
+  color = wes_palette(&quot;Royal1&quot;)[1], size = 4, family = &quot;&quot;, vjust = 2) +
+  labs(title=gsub(&quot;this&quot;,&quot;diversity&quot;,gsub(&quot;\\(survey country\\)&quot;,
+  &quot;your country&quot;,get_spss_label(dataset, 10))), y=&quot;&quot;, x=&quot;&quot;,
+  subtitle = &quot;% who say diversity is a good or a bad thing&quot;,
+  caption=&quot;Source:   Pew-Research-Center-Spring-2018&quot;) +
+    theme_classic()+
+  theme(
+      legend.position = &quot;none&quot;,
+      plot.title=element_text(size=10, family=&quot;&quot;),  # title
+      plot.title.position = &quot;plot&quot;,
+      plot.subtitle = element_text(face = &quot;italic&quot;, size = 10),
+      plot.caption=element_text(size=8),  # caption
+      #plot.caption.position = &quot;plot&quot;,
+      axis.title.x=element_text(size=10),  # X axis title
+      axis.title.y=element_text(size=10),  # Y axis title
+      axis.text.x=element_text(size=10),  # X axis text
+      axis.text.y=element_text(size=10),
+      plot.margin = margin(2,50,5,25)) </code></pre>
+<p><img src="/blog/2020_06_28_diversity_files/figure-html/unnamed-chunk-4-1.png" width="800" /></p>
+</div>
+</div>
+<div id="conlusions" class="section level2">
+<h2>Conlusions</h2>
+<p>It looks like there are some countries with more polarised views on Diversity such as Indonesia and South Korea, and other countries such as Hungary and Poland where diversity is not considered as neither/either a good thing or a bad thing.</p>
+<p>Interestingly, some countries consider diversity mostly as a bad thing (such as Greece and Nigeria).</p>
+<p>In the survey, there are several factors analysed such as education, religion, income etc, and those factors are associated with some of the replies of this survey.</p>
+</div>
+</div>
