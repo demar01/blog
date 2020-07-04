@@ -197,11 +197,11 @@ final_xgb</code></pre>
   fit(data = feat_train) %&gt;%
   pull_workflow_fit() %&gt;%
   vip(geom = &quot;point&quot;)</code></pre>
-<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-15-2.png" width="800" />
+<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-15-1.png" width="800" />
 Showing what paremeters contribute most</p>
 </div>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>As it was shown in Ochoa paper, the most informative feature for phosphorylation site function is the number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data.</p>
+<p>As it was shown in Ochoa paper, the most informative feature for Tyrosine phosphorylation function is the Position Weight Matrices, PEP and number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data.</p>
 </div>
