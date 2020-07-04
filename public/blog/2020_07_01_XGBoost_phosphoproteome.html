@@ -1,0 +1,207 @@
+---
+title: "XGBoost Phosphoproteome"
+author: "Maria Dermit"
+date: 2020-07-01
+categories: ["Phosphoproteome","XGBoost"]
+---
+
+
+
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(tidymodels)
+library(vip)
+library(funscoR) </code></pre>
+<div id="motivation-to-do-this-comparison" class="section level1">
+<h1>Motivation to do this comparison</h1>
+<p>Last year a great study on the funtional value of each phosphorylation site was published in Nautre biotechnilogy. In the paper, the author gater phosphorylation sites from XX and . More importantly, the evaluated with a regression model the contribution of each phosphorylation site to (funcitonal measured as a readout of anotation in phosphossyte link).
+The aim of my analysis is to evaluate this using the tidymodels enviromennt</p>
+<div id="use-useful-functions-withing-this-package-to-annotate-a-phosphorproteome" class="section level3">
+<h3>Use useful functions withing this package to annotate a phosphorproteome</h3>
+<pre class="r"><code>  annotated_phos &lt;- annotate_sites(phosphoproteome)
+  # annotate_sites is a function in the funscoR package that takes annotation files contained within the package to annotate a phosphoproteome with extra functional information
+  Y_features &lt;- preprocess_features(annotated_phos, &quot;Y&quot;)
+  # describe what this does</code></pre>
+<p>Phosphoproteome is an object where the authors gathered phosphorylation sites of XXX</p>
+<pre class="r"><code>feat&lt;-Y_features
+goldreg &lt;- psp
+funclasses &lt;- c(&quot;nonfunctional&quot;, &quot;functional&quot;)
+feat$is_regulatory &lt;- funclasses[unclass(as.factor(row.names(feat) %in% paste(goldreg$acc, goldreg$position, sep = &quot;_&quot;)))]
+feat$is_regulatory &lt;- as.factor(feat$is_regulatory)</code></pre>
+<p>For classification, I will use the is_regulatory variable.</p>
+</div>
+<div id="eda" class="section level3">
+<h3>EDA</h3>
+<pre class="r"><code>feat&lt;-feat %&gt;% select(-residue)
+feat$is_regulatory &lt;- as.factor(feat$is_regulatory)
+feat&lt;-feat %&gt;% as_tibble()
+feat %&gt;% count(is_regulatory)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   is_regulatory     n
+##   &lt;fct&gt;         &lt;int&gt;
+## 1 functional      400
+## 2 nonfunctional  5879</code></pre>
+</div>
+<div id="building-the-model" class="section level3">
+<h3>Building the model</h3>
+<pre class="r"><code>feat_split &lt;- initial_split(feat, strata = is_regulatory)
+feat_train &lt;- training(feat_split)
+feat_test &lt;- testing(feat_split)</code></pre>
+<p>I split the data with the initial_split function of the rsample package</p>
+<pre class="r"><code>xgb_spec &lt;- boost_tree(
+  trees = 500,
+  tree_depth = tune(), min_n = tune(),
+  loss_reduction = tune(),                ## first three: model complexity
+  sample_size = tune(), mtry = tune(),    ## randomness
+  learn_rate = tune(),                    ## step size
+) %&gt;%
+  set_engine(&quot;xgboost&quot;) %&gt;%
+  set_mode(&quot;classification&quot;)</code></pre>
+<p>This is going to build a model. I am going to use a classification model</p>
+<pre class="r"><code>xgb_grid &lt;- grid_latin_hypercube(
+  tree_depth(),
+  min_n(),
+  loss_reduction(),
+  sample_size = sample_prop(),
+  finalize(mtry(), feat_train),
+  learn_rate(),
+  size = 30 #increasing this number would lead to finner tree exploration
+) </code></pre>
+<pre class="r"><code>xgb_wf &lt;- workflow() %&gt;%
+  add_formula(is_regulatory ~ .) %&gt;%
+  add_model(xgb_spec)</code></pre>
+<p>The specified model goes into a workflow</p>
+<pre class="r"><code>set.seed(123)
+
+vb_folds &lt;- vfold_cv(feat_train, strata = is_regulatory)
+
+vb_folds</code></pre>
+<pre><code>## #  10-fold cross-validation using stratification
+## # A tibble: 10 x 2
+##    splits             id
+##    &lt;list&gt;             &lt;chr&gt;
+##  1 &lt;split [4.2K/471]&gt; Fold01
+##  2 &lt;split [4.2K/471]&gt; Fold02
+##  3 &lt;split [4.2K/471]&gt; Fold03
+##  4 &lt;split [4.2K/471]&gt; Fold04
+##  5 &lt;split [4.2K/471]&gt; Fold05
+##  6 &lt;split [4.2K/471]&gt; Fold06
+##  7 &lt;split [4.2K/471]&gt; Fold07
+##  8 &lt;split [4.2K/471]&gt; Fold08
+##  9 &lt;split [4.2K/471]&gt; Fold09
+## 10 &lt;split [4.2K/471]&gt; Fold10</code></pre>
+<p>This creates cross-validation resamples (vfold_cv from the rsample package) to tune the model.</p>
+<pre class="r"><code>doParallel::registerDoParallel()
+set.seed(234)
+xgb_res &lt;- tune_grid(
+  xgb_wf,
+  resamples = vb_folds,
+  grid = xgb_grid,
+  control = control_grid(save_pred = TRUE)
+)
+
+xgb_res</code></pre>
+<pre><code>## #  10-fold cross-validation using stratification
+## # A tibble: 10 x 5
+##    splits            id     .metrics         .notes         .predictions
+##    &lt;list&gt;            &lt;chr&gt;  &lt;list&gt;           &lt;list&gt;         &lt;list&gt;
+##  1 &lt;split [4.2K/471… Fold01 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  2 &lt;split [4.2K/471… Fold02 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  3 &lt;split [4.2K/471… Fold03 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  4 &lt;split [4.2K/471… Fold04 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  5 &lt;split [4.2K/471… Fold05 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  6 &lt;split [4.2K/471… Fold06 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  7 &lt;split [4.2K/471… Fold07 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  8 &lt;split [4.2K/471… Fold08 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+##  9 &lt;split [4.2K/471… Fold09 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
+## 10 &lt;split [4.2K/471… Fold10 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…</code></pre>
+<p>This takes a long time, but doing parallel speeds up the process</p>
+<pre class="r"><code>collect_metrics(xgb_res)</code></pre>
+<pre><code>## # A tibble: 60 x 11
+##     mtry min_n tree_depth learn_rate loss_reduction sample_size .metric
+##    &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;
+##  1     2    23          8   1.03e- 4   0.000363           0.404 accura…
+##  2     2    23          8   1.03e- 4   0.000363           0.404 roc_auc
+##  3     3     5          5   5.62e- 6   0.0125             0.923 accura…
+##  4     3     5          5   5.62e- 6   0.0125             0.923 roc_auc
+##  5     4    17         13   7.53e- 5   0.0000000245       0.516 accura…
+##  6     4    17         13   7.53e- 5   0.0000000245       0.516 roc_auc
+##  7     5    28          7   4.96e- 8  13.0                0.440 accura…
+##  8     5    28          7   4.96e- 8  13.0                0.440 roc_auc
+##  9     6    13         13   1.25e-10   0.000200           0.975 accura…
+## 10     6    13         13   1.25e-10   0.000200           0.975 roc_auc
+## # … with 50 more rows, and 4 more variables: .estimator &lt;chr&gt;, mean &lt;dbl&gt;,
+## #   n &lt;int&gt;, std_err &lt;dbl&gt;</code></pre>
+<p>The results of tune_grid can be explored with this function of the tune package</p>
+</div>
+<div id="using-visualization-to-understand-results" class="section level3">
+<h3>Using visualization to understand results</h3>
+<pre class="r"><code>xgb_res %&gt;%
+  collect_metrics() %&gt;%
+  filter(.metric == &quot;roc_auc&quot;) %&gt;%
+  select(mean, mtry:sample_size) %&gt;%
+  pivot_longer(mtry:sample_size,
+               values_to = &quot;value&quot;,
+               names_to = &quot;parameter&quot;
+  ) %&gt;%
+  ggplot(aes(value, mean, color = parameter)) +
+  geom_point(alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~parameter, scales = &quot;free_x&quot;) +
+  labs(x = NULL, y = &quot;AUC&quot;)</code></pre>
+<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-12-1.png" width="800" /></p>
+<pre class="r"><code>show_best(xgb_res, &quot;roc_auc&quot;)</code></pre>
+<pre><code>## # A tibble: 5 x 11
+##    mtry min_n tree_depth learn_rate loss_reduction sample_size .metric
+##   &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;
+## 1    14     9          5 0.0161     0.0498               0.476 roc_auc
+## 2     8     4          2 0.00762    0.000000158          0.571 roc_auc
+## 3    21    20         13 0.00452    0.000000000144       0.833 roc_auc
+## 4    18    34          4 0.0755     0.00000593           0.868 roc_auc
+## 5    27     8          6 0.00000177 0.214                0.801 roc_auc
+## # … with 4 more variables: .estimator &lt;chr&gt;, mean &lt;dbl&gt;, n &lt;int&gt;, std_err &lt;dbl&gt;</code></pre>
+<pre class="r"><code>best_auc &lt;- select_best(xgb_res, &quot;roc_auc&quot;)
+best_auc</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##    mtry min_n tree_depth learn_rate loss_reduction sample_size
+##   &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt;
+## 1    14     9          5     0.0161         0.0498       0.476</code></pre>
+<p>Yet another set of tune functions to check what are the best performing sets of
+parameters and selecting the best</p>
+<pre class="r"><code>final_xgb &lt;- finalize_workflow(
+  xgb_wf,
+  best_auc)
+final_xgb</code></pre>
+<pre><code>## ══ Workflow ═══════════════════════════════════════════════════
+## Preprocessor: Formula
+## Model: boost_tree()
+##
+## ── Preprocessor ───────────────────────────────────────────────
+## is_regulatory ~ .
+##
+## ── Model ──────────────────────────────────────────────────────
+## Boosted Tree Model Specification (classification)
+##
+## Main Arguments:
+##   mtry = 14
+##   trees = 500
+##   min_n = 9
+##   tree_depth = 5
+##   learn_rate = 0.0160598782732412
+##   loss_reduction = 0.0498089052607873
+##   sample_size = 0.475688168541528
+##
+## Computational engine: xgboost</code></pre>
+<p>Finalizing the tuneable workflow with the best parameter</p>
+<pre class="r"><code>final_xgb %&gt;%
+  fit(data = feat_train) %&gt;%
+  pull_workflow_fit() %&gt;%
+  vip(geom = &quot;point&quot;)</code></pre>
+<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-15-2.png" width="800" />
+Showing what paremeters contribute most</p>
+</div>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<p>As it was shown in Ochoa paper, the most informative feature for phosphorylation site function is the number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data.</p>
+</div>
