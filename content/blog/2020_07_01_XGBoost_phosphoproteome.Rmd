@@ -1,0 +1,181 @@
+---
+title: "XGBoost Phosphoproteome"
+author: "Maria Dermit"
+date: 2020-07-01
+categories: ["Phosphoproteome","XGBoost"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, echo=TRUE, 
+                      dpi = 100, fig.width = 8,fig.height = 5)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(tidymodels)
+library(vip)
+library(funscoR) #this package has functionally annotated human phosphosites and predict their functional consequence.
+
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(tidymodels)
+library(vip)
+library(funscoR) 
+```
+
+# Motivation to do this comparison
+Last year a great study on the funtional value of each phosphorylation site was published in  Nautre biotechnilogy. In the paper, the author gater phosphorylation sites from XX and . More importantly, the evaluated with a regression model the contribution of each phosphorylation site to (funcitonal measured as a readout of anotation in phosphossyte link). 
+The aim of my analysis is to evaluate this using the tidymodels enviromennt 
+
+
+### Use useful functions withing this package to annotate a phosphorproteome
+
+```{r}
+  annotated_phos <- annotate_sites(phosphoproteome)
+  # annotate_sites is a function in the funscoR package that takes annotation files contained within the package to annotate a phosphoproteome with extra functional information
+  Y_features <- preprocess_features(annotated_phos, "Y")
+  # describe what this does
+```
+Phosphoproteome is an object where the authors gathered phosphorylation sites of XXX
+
+
+```{r}
+feat<-Y_features
+goldreg <- psp
+funclasses <- c("nonfunctional", "functional")
+feat$is_regulatory <- funclasses[unclass(as.factor(row.names(feat) %in% paste(goldreg$acc, goldreg$position, sep = "_")))]
+feat$is_regulatory <- as.factor(feat$is_regulatory)
+```
+For classification, I will use the is_regulatory variable. 
+
+
+### EDA
+```{r}
+feat<-feat %>% select(-residue)
+feat$is_regulatory <- as.factor(feat$is_regulatory) 
+feat<-feat %>% as_tibble()
+feat %>% count(is_regulatory)
+
+```
+
+### Building the model
+```{r}
+feat_split <- initial_split(feat, strata = is_regulatory)
+feat_train <- training(feat_split)
+feat_test <- testing(feat_split)
+```
+I split the data with the initial_split function of the rsample package
+
+```{r}
+
+xgb_spec <- boost_tree(
+  trees = 500, 
+  tree_depth = tune(), min_n = tune(), 
+  loss_reduction = tune(),                ## first three: model complexity
+  sample_size = tune(), mtry = tune(),    ## randomness
+  learn_rate = tune(),                    ## step size
+) %>% 
+  set_engine("xgboost") %>% 
+  set_mode("classification")
+
+```
+This is going to build a model. I am going to use a classification model 
+
+
+```{r}
+
+xgb_grid <- grid_latin_hypercube(
+  tree_depth(),
+  min_n(),
+  loss_reduction(),
+  sample_size = sample_prop(),
+  finalize(mtry(), feat_train),
+  learn_rate(),
+  size = 30 #increasing this number would lead to finner tree exploration
+) 
+```
+
+```{r}
+
+xgb_wf <- workflow() %>%
+  add_formula(is_regulatory ~ .) %>%
+  add_model(xgb_spec)
+```
+The specified model goes into a workflow
+
+```{r}
+set.seed(123)
+
+vb_folds <- vfold_cv(feat_train, strata = is_regulatory)
+
+vb_folds
+```
+This creates cross-validation resamples (vfold_cv from the rsample package) to tune the model.
+
+
+```{r}
+doParallel::registerDoParallel()
+set.seed(234)
+xgb_res <- tune_grid(
+  xgb_wf,
+  resamples = vb_folds,
+  grid = xgb_grid,
+  control = control_grid(save_pred = TRUE)
+)
+
+xgb_res
+```
+ This takes a long time, but doing parallel speeds up the process 
+
+```{r}
+collect_metrics(xgb_res)
+```
+The results of tune_grid can be explored with this function of the tune package
+
+
+### Using visualization to understand  results
+```{r}
+xgb_res %>%
+  collect_metrics() %>%
+  filter(.metric == "roc_auc") %>%
+  select(mean, mtry:sample_size) %>%
+  pivot_longer(mtry:sample_size,
+               values_to = "value",
+               names_to = "parameter"
+  ) %>%
+  ggplot(aes(value, mean, color = parameter)) +
+  geom_point(alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~parameter, scales = "free_x") +
+  labs(x = NULL, y = "AUC")
+```
+
+```{r}
+show_best(xgb_res, "roc_auc")
+best_auc <- select_best(xgb_res, "roc_auc")
+best_auc
+```
+Yet another set of tune functions to check what are the best performing sets of
+parameters and selecting the best 
+
+
+```{r}
+final_xgb <- finalize_workflow(
+  xgb_wf,
+  best_auc)
+final_xgb
+```
+Finalizing the tuneable workflow with the best parameter 
+
+```{r}
+final_xgb %>%
+  fit(data = feat_train) %>%
+  pull_workflow_fit() %>%
+  vip(geom = "point")
+```
+Showing what paremeters contribute most
+
+# Conclusions 
+As it was shown in Ochoa paper, the most informative feature for phosphorylation site function is the number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data. 
