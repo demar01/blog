@@ -17,7 +17,7 @@
       <pubDate>Wed, 01 Jul 2020 00:00:00 +0000</pubDate>
       
       <guid>/blog/xgboost-phosphoproteome/</guid>
-      <description>library(dplyr) library(ggplot2) library(tidyverse) library(tidymodels) library(vip) library(funscoR)  Motivation to do this comparison Last year a great study on the funtional value of each phosphorylation site was published in Nautre biotechnilogy. In the paper, the author gater phosphorylation sites from XX and . More importantly, the evaluated with a regression model the contribution of each phosphorylation site to (funcitonal measured as a readout of anotation in phosphossyte link). The aim of my analysis is to evaluate this using the tidymodels enviromennt</description>
+      <description>library(dplyr) library(ggplot2) library(tidyverse) library(tidymodels) library(vip) library(funscoR)  Motivation to do this comparison Last year a great study on the funtional value of each phosphorylation site was published in Nature Biotechnology. In the paper, the authors gather phosphorylation sites from 6,801 proteomics experiments and created a reference phosphoproteome containing 119,809 human phosphosites. More importantly, the evaluated with a regression model the contribution of each phosphorylation site (funcitonal measured as a readout of anotation in PhosphoSitePlus.</description>
     </item>
     
     <item>
