@@ -15,15 +15,15 @@ library(vip)
 library(funscoR) </code></pre>
 <div id="motivation-to-do-this-comparison" class="section level1">
 <h1>Motivation to do this comparison</h1>
-<p>Last year a great study on the funtional value of each phosphorylation site was published in Nautre biotechnilogy. In the paper, the author gater phosphorylation sites from XX and . More importantly, the evaluated with a regression model the contribution of each phosphorylation site to (funcitonal measured as a readout of anotation in phosphossyte link).
-The aim of my analysis is to evaluate this using the tidymodels enviromennt</p>
+<p>Last year a great study on the funtional value of each phosphorylation site was published in <a href="https://www.nature.com/articles/s41587-019-0344-3">Nature Biotechnology</a>. In the paper, the authors gather phosphorylation sites from 6,801 proteomics experiments and created a reference phosphoproteome containing 119,809 human phosphosites. More importantly, the evaluated with a regression model the contribution of each phosphorylation site (funcitonal measured as a readout of anotation in <a href="https://www.phosphosite.org/homeAction.action">PhosphoSitePlus</a>.
+The aim of my analysis is to evaluate this using the tidymodels enviromennt.</p>
 <div id="use-useful-functions-withing-this-package-to-annotate-a-phosphorproteome" class="section level3">
 <h3>Use useful functions withing this package to annotate a phosphorproteome</h3>
 <pre class="r"><code>  annotated_phos &lt;- annotate_sites(phosphoproteome)
   # annotate_sites is a function in the funscoR package that takes annotation files contained within the package to annotate a phosphoproteome with extra functional information
   Y_features &lt;- preprocess_features(annotated_phos, &quot;Y&quot;)
   # describe what this does</code></pre>
-<p>Phosphoproteome is an object where the authors gathered phosphorylation sites of XXX</p>
+<p>Phosphoproteome is an object where the authors gathered phosphorylation sites.</p>
 <pre class="r"><code>feat&lt;-Y_features
 goldreg &lt;- psp
 funclasses &lt;- c(&quot;nonfunctional&quot;, &quot;functional&quot;)
@@ -34,7 +34,7 @@ feat$is_regulatory &lt;- as.factor(feat$is_regulatory)</code></pre>
 <div id="eda" class="section level3">
 <h3>EDA</h3>
 <pre class="r"><code>feat&lt;-feat %&gt;% select(-residue)
-feat$is_regulatory &lt;- as.factor(feat$is_regulatory)
+feat$is_regulatory &lt;- as.factor(feat$is_regulatory) 
 feat&lt;-feat %&gt;% as_tibble()
 feat %&gt;% count(is_regulatory)</code></pre>
 <pre><code>## # A tibble: 2 x 2
@@ -50,13 +50,13 @@ feat_train &lt;- training(feat_split)
 feat_test &lt;- testing(feat_split)</code></pre>
 <p>I split the data with the initial_split function of the rsample package</p>
 <pre class="r"><code>xgb_spec &lt;- boost_tree(
-  trees = 500,
-  tree_depth = tune(), min_n = tune(),
+  trees = 500, 
+  tree_depth = tune(), min_n = tune(), 
   loss_reduction = tune(),                ## first three: model complexity
   sample_size = tune(), mtry = tune(),    ## randomness
   learn_rate = tune(),                    ## step size
-) %&gt;%
-  set_engine(&quot;xgboost&quot;) %&gt;%
+) %&gt;% 
+  set_engine(&quot;xgboost&quot;) %&gt;% 
   set_mode(&quot;classification&quot;)</code></pre>
 <p>This is going to build a model. I am going to use a classification model</p>
 <pre class="r"><code>xgb_grid &lt;- grid_latin_hypercube(
@@ -77,10 +77,10 @@ feat_test &lt;- testing(feat_split)</code></pre>
 vb_folds &lt;- vfold_cv(feat_train, strata = is_regulatory)
 
 vb_folds</code></pre>
-<pre><code>## #  10-fold cross-validation using stratification
+<pre><code>## #  10-fold cross-validation using stratification 
 ## # A tibble: 10 x 2
-##    splits             id
-##    &lt;list&gt;             &lt;chr&gt;
+##    splits             id    
+##    &lt;list&gt;             &lt;chr&gt; 
 ##  1 &lt;split [4.2K/471]&gt; Fold01
 ##  2 &lt;split [4.2K/471]&gt; Fold02
 ##  3 &lt;split [4.2K/471]&gt; Fold03
@@ -102,10 +102,10 @@ xgb_res &lt;- tune_grid(
 )
 
 xgb_res</code></pre>
-<pre><code>## #  10-fold cross-validation using stratification
+<pre><code>## #  10-fold cross-validation using stratification 
 ## # A tibble: 10 x 5
-##    splits            id     .metrics         .notes         .predictions
-##    &lt;list&gt;            &lt;chr&gt;  &lt;list&gt;           &lt;list&gt;         &lt;list&gt;
+##    splits            id     .metrics         .notes         .predictions        
+##    &lt;list&gt;            &lt;chr&gt;  &lt;list&gt;           &lt;list&gt;         &lt;list&gt;              
 ##  1 &lt;split [4.2K/471… Fold01 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
 ##  2 &lt;split [4.2K/471… Fold02 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
 ##  3 &lt;split [4.2K/471… Fold03 &lt;tibble [60 × 9… &lt;tibble [0 × … &lt;tibble [14,130 × 1…
@@ -120,7 +120,7 @@ xgb_res</code></pre>
 <pre class="r"><code>collect_metrics(xgb_res)</code></pre>
 <pre><code>## # A tibble: 60 x 11
 ##     mtry min_n tree_depth learn_rate loss_reduction sample_size .metric
-##    &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;
+##    &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  
 ##  1     2    23          8   1.03e- 4   0.000363           0.404 accura…
 ##  2     2    23          8   1.03e- 4   0.000363           0.404 roc_auc
 ##  3     3     5          5   5.62e- 6   0.0125             0.923 accura…
@@ -153,7 +153,7 @@ xgb_res</code></pre>
 <pre class="r"><code>show_best(xgb_res, &quot;roc_auc&quot;)</code></pre>
 <pre><code>## # A tibble: 5 x 11
 ##    mtry min_n tree_depth learn_rate loss_reduction sample_size .metric
-##   &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;
+##   &lt;int&gt; &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  
 ## 1    14     9          5 0.0161     0.0498               0.476 roc_auc
 ## 2     8     4          2 0.00762    0.000000158          0.571 roc_auc
 ## 3    21    20         13 0.00452    0.000000000144       0.833 roc_auc
@@ -175,13 +175,13 @@ final_xgb</code></pre>
 <pre><code>## ══ Workflow ═══════════════════════════════════════════════════
 ## Preprocessor: Formula
 ## Model: boost_tree()
-##
+## 
 ## ── Preprocessor ───────────────────────────────────────────────
 ## is_regulatory ~ .
-##
+## 
 ## ── Model ──────────────────────────────────────────────────────
 ## Boosted Tree Model Specification (classification)
-##
+## 
 ## Main Arguments:
 ##   mtry = 14
 ##   trees = 500
@@ -190,18 +190,18 @@ final_xgb</code></pre>
 ##   learn_rate = 0.0160598782732412
 ##   loss_reduction = 0.0498089052607873
 ##   sample_size = 0.475688168541528
-##
+## 
 ## Computational engine: xgboost</code></pre>
 <p>Finalizing the tuneable workflow with the best parameter</p>
 <pre class="r"><code>final_xgb %&gt;%
   fit(data = feat_train) %&gt;%
   pull_workflow_fit() %&gt;%
   vip(geom = &quot;point&quot;)</code></pre>
-<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-15-1.png" width="800" />
-Showing what paremeters contribute most</p>
+<p><img src="/blog/2020_07_01_XGBoost_phosphoproteome_files/figure-html/unnamed-chunk-15-1.png" width="800" /></p>
+<p>Showing what paremeters contribute most</p>
 </div>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>As it was shown in Ochoa paper, the most informative feature for Tyrosine phosphorylation function is the Position Weight Matrices, PEP and number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data. </p>
+<p>As it was shown in Ochoa paper, the most informative feature for Tyrosine phosphorylation function is the Position Weight Matrices, PEP and number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data.</p>
 </div>

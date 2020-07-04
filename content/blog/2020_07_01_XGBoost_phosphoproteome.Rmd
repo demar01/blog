@@ -27,8 +27,8 @@ library(funscoR)
 ```
 
 # Motivation to do this comparison
-Last year a great study on the funtional value of each phosphorylation site was published in  Nautre biotechnilogy. In the paper, the author gater phosphorylation sites from XX and . More importantly, the evaluated with a regression model the contribution of each phosphorylation site to (funcitonal measured as a readout of anotation in phosphossyte link). 
-The aim of my analysis is to evaluate this using the tidymodels enviromennt 
+Last year a great study on the funtional value of each phosphorylation site was published in [Nature Biotechnology](https://www.nature.com/articles/s41587-019-0344-3). In the paper, the authors gather phosphorylation sites from 6,801 proteomics experiments and created a reference phosphoproteome containing 119,809 human phosphosites. More importantly, the evaluated with a regression model the contribution of each phosphorylation site (funcitonal measured as a readout of anotation in [PhosphoSitePlus](https://www.phosphosite.org/homeAction.action). 
+The aim of my analysis is to evaluate this using the tidymodels enviromennt.
 
 
 ### Use useful functions withing this package to annotate a phosphorproteome
@@ -39,7 +39,7 @@ The aim of my analysis is to evaluate this using the tidymodels enviromennt
   Y_features <- preprocess_features(annotated_phos, "Y")
   # describe what this does
 ```
-Phosphoproteome is an object where the authors gathered phosphorylation sites of XXX
+Phosphoproteome is an object where the authors gathered phosphorylation sites.
 
 
 ```{r}
@@ -175,7 +175,8 @@ final_xgb %>%
   pull_workflow_fit() %>%
   vip(geom = "point")
 ```
+
 Showing what paremeters contribute most
 
 # Conclusions 
-As it was shown in Ochoa paper, the most informative feature for phosphorylation site function is the number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data. 
+As it was shown in Ochoa paper, the most informative feature for Tyrosine phosphorylation function is the Position Weight Matrices, PEP and number of different cell lines or tissues in which the site had been identified. This makes sense, since Phosphosite feeds from phosphoproteomics data. 
