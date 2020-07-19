@@ -7,7 +7,7 @@ categories: ["SARS-CoV-2","Human proteome", "Network"]
 
 # Motivation to do this exploration
 A fantastic paper investigating the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by
-[Mathias Munschauer group](https://www.biorxiv.org/content/10.1101/2020.07.15.204404v1)
+[Mathias Munschauer group](https://www.biorxiv.org/content/10.1101/2020.07.15.204404v1).
 The authors used purification and mass spectrometry (RAP-MS) to get the proteome that directly binds the SARS-CoV-2 when this infects human cells in an unbiased manner. 
 
 I got super curious about these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins which certainly will contribute to the understanding of SARS-CoV-2 biology better. 
@@ -41,7 +41,7 @@ library(grid)
 ```
 
 ### Building protein-protein interactions
-PPI network can be built with STRING. We need String used Aliases anf the interaction values.   
+PPI network can be built with [STRING](https://string-db.org/). We need String's aliases and  interaction values.   
 ```{r,eval=FALSE}
 aliases <- fread("/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/
                  9606.protein.aliases.v11.0.txt.gz", skip = 1, header = FALSE, 
@@ -53,7 +53,7 @@ gene2string <- (aliases$STRINGid)
 names(gene2string) <- (aliases$Alias)
 ```
 
-I obtained this function from the authors that is used to generated interaction database. 
+I obtained this function from the authors that is used to generated an interaction database. 
 ```{r, eval=FALSE}
 pull_string_v11 <- function(genes_keep, min_score = 0){
   
@@ -71,7 +71,7 @@ pull_string_v11 <- function(genes_keep, min_score = 0){
   
 }
 ```
-Once that we have the database we can visualise Covid19 interacting proteins
+Once that we have the database we can visualise Covid19-interacting proteins
 ```{r eval=FALSE}
 rap <- fread("https://raw.githubusercontent.com/demar01/blog/master/data/SCoV2/SCoV2_RAPms.txt") %>%
   filter(adj.P.Val.SCoV2.over.RMRP < 0.2 & species == "HOMO SAPIENS" & logFC.SCoV2.over.RMRP > 0)
@@ -134,7 +134,8 @@ net %v% "color" = color_vec
 
 ```{r eval=FALSE}
 # Now do size
-n_size_vec = rap$logFC.SCoV2.over.RMRP; names(n_size_vec) <- as.character(rap$geneSymbol)
+n_size_vec = rap$logFC.SCoV2.over.RMRP
+names(n_size_vec) <- as.character(rap$geneSymbol)
 size_vec <- unname(n_size_vec[levels])
 net %v% "size_of_node" = size_vec
 ```
@@ -181,5 +182,5 @@ pDrug
 
 
 # Conclusions 
- This is a fantastic resource of the direct SARS-CoV-2 RNA-protein interactome in infected human cells. obtained by RAP-MS. Very interestingly ANXA1 is a known target of dexamethasone, which according to newly emerging clinical trial data appears to show efficacy as a treatment for [COVID-19](https://www.medrxiv.org/content/10.1101/2020.06.22.20137273v1).
+ This is a fantastic resource of the direct RNA-protein interactome when SARS-CoV-2 infects human cells obtained by RAP-MS. Very interestingly ANXA1 is a known target of dexamethasone, which according to newly emerging clinical trial data appears to show efficacy as a treatment for [COVID-19](https://www.medrxiv.org/content/10.1101/2020.06.22.20137273v1).
 
