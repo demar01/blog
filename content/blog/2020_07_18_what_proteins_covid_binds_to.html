@@ -79,11 +79,9 @@ viral_rna &lt;- c(&quot;ATP1A1&quot;,&quot;CAPRIN1&quot;,&quot;CFL1&quot;,&quot;
   levels %in% viral_rna ~ &quot;viral_rna_bind&quot;,
   TRUE ~ &quot;Other&quot;
 )
-table(color_vec)</code></pre>
-<pre><code>## color_vec
-##          Other             RP viral_rna_bind 
-##             40             19             31</code></pre>
-<pre class="r"><code>net %v% &quot;color&quot; = color_vec</code></pre>
+table(color_vec)
+
+net %v% &quot;color&quot; = color_vec</code></pre>
 <pre class="r"><code># Now do size
 n_size_vec = rap$logFC.SCoV2.over.RMRP; names(n_size_vec) &lt;- as.character(rap$geneSymbol)
 size_vec &lt;- unname(n_size_vec[levels])
@@ -94,8 +92,9 @@ pAI &lt;- ggnet2(net, label = levels[color_vec != &quot;Other&quot;], color = &q
               layout.par = list(repulse.rad = 2000), alpha = 0.75, size = &quot;size_of_node&quot;, size.cut = 10,
               palette = c(&quot;Other&quot; = &quot;grey&quot;, &quot;RP&quot; =  &quot;dodgerblue4&quot;, &quot;viral_rna_bind&quot; = &quot;purple2&quot;),
               label.size = 2)  +  guides( size = FALSE)
-pAI</code></pre>
-<p><img src="/blog/2020_07_18_what_proteins_covid_binds_to_files/figure-html/unnamed-chunk-11-1.png" width="800" /></p>
+
+#ggsave(here(&quot;static&quot;,&quot;img&quot;, &quot;pAI.jpg&quot;))</code></pre>
+<p><img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/pAI.jpg" /></p>
 </div>
 <div id="what-of-those-proteins-are-druggable" class="section level3">
 <h3>What of those proteins are druggable?</h3>
@@ -110,8 +109,10 @@ pDrug &lt;- ggnet2(net, label = druggable, color = &quot;drug_target&quot;,  leg
               layout.par = list(repulse.rad = 2000), alpha = 0.75, size = &quot;size_of_node&quot;, size.cut = 10,
               palette = c(&quot;FALSE&quot; = &quot;grey&quot;, &quot;TRUE&quot; = &quot;firebrick&quot;),
               label.size = 2) +  guides( size = FALSE)
-pDrug</code></pre>
-<p><img src="/blog/2020_07_18_what_proteins_covid_binds_to_files/figure-html/unnamed-chunk-13-1.png" width="800" /></p>
+pDrug
+
+#ggsave(here(&quot;static&quot;,&quot;img&quot;, &quot;pDrug.jpg&quot;))</code></pre>
+<p><img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/pDrug.jpg" /></p>
 </div>
 </div>
 <div id="conclusions" class="section level1">
