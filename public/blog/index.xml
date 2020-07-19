@@ -6,10 +6,20 @@
     <description>Recent content in Blog on Maria Dermit</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 01 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 18 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Covid-bound proteins</title>
+      <link>/blog/covid-bound-proteins/</link>
+      <pubDate>Sat, 18 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/covid-bound-proteins/</guid>
+      <description>Motivation to do this exploration A fantastic paper on the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by Mathias Munschauer group The authors used purification and mass spectrometry (RAP-MS) to get the proteome that directly binds the SARS-CoV-2 when this infects human cells in an unbiased manner.
+I got super curious on these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins that helps understanding SARS-CoV-2 biology better.</description>
+    </item>
     
     <item>
       <title>XGBoost Phosphoproteome</title>
