@@ -1,0 +1,120 @@
+---
+title: "Covid-bound proteins"
+author: "Maria Dermit"
+date: 2020-07-18
+categories: ["SARS-CoV-2","Human proteome", "Network"]
+---
+
+
+
+<div id="motivation-to-do-this-exploration" class="section level1">
+<h1>Motivation to do this exploration</h1>
+<p>A fantastic paper on the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by
+<a href="https://www.biorxiv.org/content/10.1101/2020.07.15.204404v1">Mathias Munschauer group</a>
+The authors used purification and mass spectrometry (RAP-MS) to get the proteome that directly binds the SARS-CoV-2 when this infects human cells in an unbiased manner.</p>
+<p>I got super curious on these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins that helps understanding SARS-CoV-2 biology better.</p>
+<pre class="r"><code>library(here)
+library(httr)
+library(tidyverse)
+library(data.table)
+library(dplyr)
+library(Matrix)
+library(GGally)
+library(network)
+library(grid)</code></pre>
+<div id="building-protein-protein-interactions" class="section level3">
+<h3>Building protein-protein interactions</h3>
+<p>PPI network can be built with STRING. We need String used Aliases anf the interaction values.</p>
+<pre class="r"><code>aliases &lt;- fread(&quot;/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/9606.protein.aliases.v11.0.txt.gz&quot;, skip = 1, header = FALSE, col.names = c(&quot;STRINGid&quot;, &quot;Alias&quot;, &quot;source&quot;))[,c(1,2)]
+
+string_v11 &lt;- fread(&quot;/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/9606.protein.links.v11.0.txt.gz&quot;)
+gene2string &lt;- (aliases$STRINGid)
+names(gene2string) &lt;- (aliases$Alias)</code></pre>
+<p>I obtained this function from the authors that is used to generated interaction database.</p>
+<pre class="r"><code>pull_string_v11 &lt;- function(genes_keep, min_score = 0){
+  
+  string_genes_keep &lt;- gene2string[genes_keep]
+  string2gene &lt;- names(string_genes_keep); names(string2gene) &lt;- unname(string_genes_keep)
+  #print(paste0(&quot;WARNING: &quot;, paste(genes_keep[is.na(string2gene)], collapse = &quot;,&quot;), &quot; not found&quot;))
+
+    # Now filter
+  data &lt;- string_v11 %&gt;% filter(combined_score &gt; min_score) %&gt;%
+    filter(protein1 %in% unname(string_genes_keep) &amp; protein2 %in% unname(string_genes_keep))
+  
+  data$node1 &lt;- unname(string2gene[as.character(data$protein1)])
+  data$node2 &lt;- unname(string2gene[as.character(data$protein2)])
+  data[complete.cases(data),c(&quot;node1&quot;, &quot;node2&quot;, &quot;combined_score&quot;)]
+  
+}</code></pre>
+<p>Once that we have the database we can visualise Covid19 interacting proteins</p>
+<pre class="r"><code>rap &lt;- fread(&quot;https://raw.githubusercontent.com/demar01/blog/master/data/SCoV2/SCoV2_RAPms.txt&quot;) %&gt;%
+  filter(adj.P.Val.SCoV2.over.RMRP &lt; 0.2 &amp; species == &quot;HOMO SAPIENS&quot; &amp; logFC.SCoV2.over.RMRP &gt; 0)
+rap_genes &lt;- rap %&gt;% pull(geneSymbol)</code></pre>
+<p>Initially the authors included edges between interacting proteins that have a combined interaction score of 550. I built a more restictive network with min_score 750</p>
+<pre class="r"><code>edges &lt;- pull_string_v11(min_score = 750, genes_keep = rap_genes)</code></pre>
+<pre class="r"><code>qc_genes &lt;- c(&quot;SCFD1&quot;, &quot;RAB6C&quot;, &quot;RAB7A&quot;, &quot;GDI2&quot;)</code></pre>
+</div>
+<div id="building-the-network" class="section level3">
+<h3>Building the network</h3>
+<pre class="r"><code>levels = unique(c(edges$node1, edges$node2))
+edges$node1 &lt;- factor(edges$node1, levels = levels)
+edges$node2 &lt;- factor(edges$node2, levels = levels)
+
+sm &lt;- sparseMatrix(i = c(as.numeric(edges[[&quot;node1&quot;]]), length(levels)), 
+                   j = c(as.numeric(edges[[&quot;node2&quot;]]), length(levels)), 
+                   x  = c(edges[[&quot;combined_score&quot;]], 0)) %&gt;% data.matrix()
+rownames(sm) &lt;- levels
+colnames(sm) &lt;- levels
+
+net &lt;- network(sm)</code></pre>
+<p>Lets name the proteins for further colouring</p>
+<pre class="r"><code># Show the full network
+vesicle &lt;- c(&quot;RAB7A&quot;,&quot;RAB6A&quot;,&quot;RAB1A&quot;,&quot;SCFD1&quot;,&quot;USO1&quot;, &quot;GDI2&quot;)
+viral_rna &lt;- c(&quot;ATP1A1&quot;,&quot;CAPRIN1&quot;,&quot;CFL1&quot;,&quot;CSDE1&quot;,&quot;DDX1&quot;,&quot;DDX3X&quot;,&quot;EEF1A1&quot;,&quot;EEF2&quot;,&quot;EIF3E&quot;,&quot;EIF3G&quot;,&quot;EIF3L&quot;,&quot;EIF4B&quot;,&quot;EIF4G1&quot;,&quot;EIF4H&quot;,&quot;EIF5A&quot;,&quot;G3BP1&quot;,&quot;G3BP2&quot;,
+               &quot;HNRNPA1&quot;,&quot;HNRNPA2B1&quot;,&quot;IGF2BP1&quot;,&quot;IGF2BP2&quot;,&quot;LIN28B&quot;,&quot;LSM14A&quot;,&quot;MOV10&quot;,&quot;PABPC1&quot;,&quot;PCBP2&quot;,&quot;PEBP1&quot;,&quot;PFN1&quot;,&quot;PPIA&quot;,&quot;RPL13&quot;,&quot;RPL15&quot;,&quot;RPL18A&quot;,&quot;RPL21&quot;,
+               &quot;RPL28&quot;,&quot;RPL3&quot;,&quot;RPL36A&quot;,&quot;RPL6&quot;,&quot;RPL7A&quot;,&quot;RPL8&quot;,&quot;RPS11&quot;,&quot;RPS12&quot;,&quot;RPS14&quot;,&quot;RPS2&quot;,&quot;RPS26&quot;,&quot;RPS3&quot;,&quot;RPS4X&quot;,&quot;RPS5&quot;,&quot;SND1&quot;,&quot;SYNCRIP&quot;,&quot;UPF1&quot;,&quot;YBX1&quot;)</code></pre>
+<p>Lets get annotation for colouring</p>
+<pre class="r"><code>color_vec &lt;- case_when(
+  grepl(&quot;^RP&quot;, levels) ~ &quot;RP&quot;,
+  levels %in% viral_rna ~ &quot;viral_rna_bind&quot;,
+  TRUE ~ &quot;Other&quot;
+)
+table(color_vec)</code></pre>
+<pre><code>## color_vec
+##          Other             RP viral_rna_bind 
+##             40             19             31</code></pre>
+<pre class="r"><code>net %v% &quot;color&quot; = color_vec</code></pre>
+<pre class="r"><code># Now do size
+n_size_vec = rap$logFC.SCoV2.over.RMRP; names(n_size_vec) &lt;- as.character(rap$geneSymbol)
+size_vec &lt;- unname(n_size_vec[levels])
+net %v% &quot;size_of_node&quot; = size_vec</code></pre>
+<p>We can use the function ggnet2 for plotting network objects using ggplot2</p>
+<pre class="r"><code>set.seed(1)
+pAI &lt;- ggnet2(net, label = levels[color_vec != &quot;Other&quot;], color = &quot;color&quot;,  legend.position = &quot;right&quot;, mode = &quot;fruchtermanreingold&quot;,
+              layout.par = list(repulse.rad = 2000), alpha = 0.75, size = &quot;size_of_node&quot;, size.cut = 10,
+              palette = c(&quot;Other&quot; = &quot;grey&quot;, &quot;RP&quot; =  &quot;dodgerblue4&quot;, &quot;viral_rna_bind&quot; = &quot;purple2&quot;),
+              label.size = 2)  +  guides( size = FALSE)
+pAI</code></pre>
+<p><img src="/blog/2020_07_18_what_proteins_covid_binds_to_files/figure-html/unnamed-chunk-11-1.png" width="800" /></p>
+</div>
+<div id="what-of-those-proteins-are-druggable" class="section level3">
+<h3>What of those proteins are druggable?</h3>
+<p>Reading the drug-target data</p>
+<pre class="r"><code>drugs &lt;- fread(&quot;https://raw.githubusercontent.com/demar01/blog/e282080e210e6d7690402535025b5620046c7bb9/data/SCoV2/RAP-MS_dgidb_export_2020-06-29.tsv&quot;)</code></pre>
+<pre class="r"><code>druggable &lt;- drugs %&gt;% pull(search_term) %&gt;% unique()
+
+net %v% &quot;drug_target&quot; = levels %in% druggable
+
+set.seed(1)
+pDrug &lt;- ggnet2(net, label = druggable, color = &quot;drug_target&quot;,  legend.position = &quot;right&quot;, mode = &quot;fruchtermanreingold&quot;,
+              layout.par = list(repulse.rad = 2000), alpha = 0.75, size = &quot;size_of_node&quot;, size.cut = 10,
+              palette = c(&quot;FALSE&quot; = &quot;grey&quot;, &quot;TRUE&quot; = &quot;firebrick&quot;),
+              label.size = 2) +  guides( size = FALSE)
+pDrug</code></pre>
+<p><img src="/blog/2020_07_18_what_proteins_covid_binds_to_files/figure-html/unnamed-chunk-13-1.png" width="800" /></p>
+</div>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<p>This is a fantastic resource of the direct SARS-CoV-2 RNA-protein interactome in infected human cells. obtained by RAP-MS. Very interestingly ANXA1 is a known target of dexamethasone, which according to newly emerging clinical trial data appears to show efficacy as a treatment for <a href="https://www.medrxiv.org/content/10.1101/2020.06.22.20137273v1">COVID-19</a>.</p>
+</div>
