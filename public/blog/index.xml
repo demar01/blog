@@ -49,16 +49,6 @@ I got super curious on these data and wanted to explore myself. I wanted to visu
     </item>
     
     <item>
-      <title>BJ_TL</title>
-      <link>/blog/bj_tl/</link>
-      <pubDate>Wed, 24 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/blog/bj_tl/</guid>
-      <description>UK goverment messages In order to know what messages are being twitted by UK’s PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.
-bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% names() v&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% as.numeric() d&amp;lt;-data.frame(m,v) %&amp;gt;% arrange(v) wordcloud(words = d$m, freq = d$v, min.</description>
-    </item>
-    
-    <item>
       <title>Dataviz</title>
       <link>/blog/dataviz/</link>
       <pubDate>Tue, 23 Jun 2020 00:00:00 +0000</pubDate>
@@ -66,6 +56,16 @@ bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-
       <guid>/blog/dataviz/</guid>
       <description>FANTASTIC talk on DataViz I did not attend to rstudioconf-2020, but I engaged the #rstudioconf2020 watch many of the talks. One of them I particularly loved was “The glamour of Graphic” by Will Chase. As he sayed in his talk, once you learnt certain things, you cannot stop noticing where those amazing trick are not being used, and I find this to be so true for dataviz!
 I start from the premise that any plotting should be done with ggplot2.</description>
+    </item>
+    
+    <item>
+      <title>2020_06_23_BJTL</title>
+      <link>/blog/2020_06_23_bjtl/</link>
+      <pubDate>Sun, 21 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/2020_06_23_bjtl/</guid>
+      <description>UK goverment message In order to know what messages are being twitted by UK’s PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.
+bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% names() v&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% as.numeric() d&amp;lt;-data.frame(m,v) %&amp;gt;% arrange(v) wordcloud(words = d$m, freq = d$v, min.</description>
     </item>
     
     <item>

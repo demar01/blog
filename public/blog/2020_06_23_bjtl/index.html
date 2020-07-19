@@ -15,9 +15,9 @@
 <meta property="og:site_name" content="Maria Dermit" />
 <meta property="og:locale" content="en-US" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/blog/" />
-<meta property="og:title" content="Blog" />
-<meta property="twitter:title" content="Blog">
+<meta property="og:url" content="/blog/2020_06_23_bjtl/" />
+<meta property="og:title" content="2020_06_23_BJTL" />
+<meta property="twitter:title" content="2020_06_23_BJTL">
 
     <meta property="og:image" content="/img/ribo.jpeg">
     <meta property="twitter:card" content="summary_large_image">
@@ -29,10 +29,10 @@
 <title>
 
 
-     Maria Dermit - Blog 
+     Maria Dermit - 2020_06_23_BJTL 
 
 </title>
-<link rel="canonical" href="/blog/">
+<link rel="canonical" href="/blog/2020_06_23_bjtl/">
 
 
 <style media="screen">
@@ -997,8 +997,6 @@ margin-left: -4%;
 
 
 
-  <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="Maria Dermit" />
-
 
 </head>
 
@@ -1047,102 +1045,121 @@ margin-left: -4%;
     </div>
 </div>
 
-<div class="main column">
+
+
+
+
+<div class="main post non-narrow zero-top-spacing column">
     <div class="container">
         <div class="content">
-            <div class="posts">
-                <div class="page-heading">Blog</div>
+            <div class="front-matter">
+                <div class="title-container">
+                    <div class="page-heading">
 
-                
+    
+    2020_06_23_BJTL
+    
 
-                
-                <ul>
+</div>
+
+                </div>
+                <div class="meta">
+                    <div class="date" title="Sun Jun 21 2020 00:00:00 UTC">Jun 21, 2020</div>
                     
-                      
-                        <li class="groupby">Jul, 2020</li>
                         
-                          
-                            <li class="post-item">
-    <span class="meta">Jul 18, 2020</span>
-    
-    <a href="/blog/covid-bound-proteins/"><span>Covid-bound proteins</span></a>
-    
-</li>
-
-                          
+                        <div class="author middot" title="Maria Dermit">Maria Dermit</div>
                         
-                          
-                            <li class="post-item">
-    <span class="meta">Jul 1, 2020</span>
-    
-    <a href="/blog/xgboost-phosphoproteome/"><span>XGBoost Phosphoproteome</span></a>
-    
-</li>
-
-                          
-                        
-                      
                     
-                      
-                        <li class="groupby">Jun, 2020</li>
-                        
-                          
-                            <li class="post-item">
-    <span class="meta">Jun 27, 2020</span>
-    
-    <a href="/blog/diversity/"><span>Diversity</span></a>
-    
-</li>
-
-                          
-                        
-                          
-                            <li class="post-item">
-    <span class="meta">Jun 26, 2020</span>
-    
-    <a href="/blog/spotify/"><span>Spotify</span></a>
-    
-</li>
-
-                          
-                        
-                          
-                            <li class="post-item">
-    <span class="meta">Jun 23, 2020</span>
-    
-    <a href="/blog/dataviz/"><span>Dataviz</span></a>
-    
-</li>
-
-                          
-                        
-                          
-                            <li class="post-item">
-    <span class="meta">Jun 21, 2020</span>
-    
-    <a href="/blog/rblogdown/"><span>Rblogdown</span></a>
-    
-</li>
-
-                          
-                        
-                          
-                            <li class="post-item">
-    <span class="meta">Jun 21, 2020</span>
-    
-    <a href="/blog/2020_06_23_bjtl/"><span>2020_06_23_BJTL</span></a>
-    
-</li>
-
-                          
-                        
-                      
                     
-                </ul>
+                    <div class="reading-time middot">1 minute read</div>
+                    
+                    
+                      <div class="tags">
+                    
+                        <ul>
+                          
+                        </ul>
+                    </div>
+                    <div class="tags">
+                        <ul>
+                          
+                          
+                        </ul>
+                    </div>
+                </div>
             </div>
+            <div class="markdown">
+                
+    
+    
+
+
+<div id="uk-goverment-message" class="section level2">
+<h2>UK goverment message</h2>
+<p>In order to know what messages are being twitted by UK’s PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.</p>
+<pre class="r"><code>bj &lt;- get_timeline(&quot;BorisJohnson&quot;, n = 3200)
+m&lt;-bj %&gt;% filter(is_retweet==&quot;FALSE&quot;) %&gt;% pull(hashtags)%&gt;%
+  unlist() %&gt;% table() %&gt;% names()
+v&lt;-bj %&gt;% filter(is_retweet==&quot;FALSE&quot;) %&gt;% pull(hashtags)%&gt;%
+  unlist() %&gt;% table() %&gt;% as.numeric()
+d&lt;-data.frame(m,v) %&gt;% arrange(v)
+wordcloud(words = d$m, freq = d$v, min.freq = 3,scale = c(3, 0.5),
+          max.words=300, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, &quot;Dark2&quot;))</code></pre>
+<p><img src="/blog/2020_06_24_UKgoverment_message_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+
+
+            </div>
+            
+            <br>
+            <div class="share">
+                  
+                  <a href="" class="ssk ssk-facebook"></a>
+                  
+                  
+                  <a href="" class="ssk ssk-twitter"></a>
+                  
+                  
+                  <a href="" class="ssk ssk-google-plus"></a>
+                  
+                  
+                  <a href="" class="ssk ssk-linkedin"></a>
+                  
+            </div>
+            
+            
+            <br>
+            <div class="navigation">
+                
+                <div>
+                    <img class="icon" src="/img/back.svg" alt="back" />
+                    <a href="/blog/rblogdown/">Rblogdown</a>
+                </div>
+                
+                <div style="width: 100%;"></div>
+                
+                <div>
+                    <a href="/blog/dataviz/">Dataviz</a>
+                    <img class="icon" src="/img/next.svg" alt="next" />
+                </div>
+                
+            </div>
+            
+            
+
+            
+            
+
+            
+
+            
         </div>
     </div>
 </div>
+
+
+
 <div class="footer column">
     <div class="container">
 
