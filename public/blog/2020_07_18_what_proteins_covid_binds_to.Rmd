@@ -6,11 +6,11 @@ categories: ["SARS-CoV-2","Human proteome", "Network"]
 ---
 
 # Motivation to do this exploration
-A fantastic paper on the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by
+A fantastic paper investigating the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by
 [Mathias Munschauer group](https://www.biorxiv.org/content/10.1101/2020.07.15.204404v1)
 The authors used purification and mass spectrometry (RAP-MS) to get the proteome that directly binds the SARS-CoV-2 when this infects human cells in an unbiased manner. 
 
-I got super curious on these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins that helps understanding SARS-CoV-2 biology better. 
+I got super curious about these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins which certainly will contribute to the understanding of SARS-CoV-2 biology better. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, echo=TRUE, 
@@ -43,9 +43,12 @@ library(grid)
 ### Building protein-protein interactions
 PPI network can be built with STRING. We need String used Aliases anf the interaction values.   
 ```{r,eval=FALSE}
-aliases <- fread("/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/9606.protein.aliases.v11.0.txt.gz", skip = 1, header = FALSE, col.names = c("STRINGid", "Alias", "source"))[,c(1,2)]
+aliases <- fread("/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/
+                 9606.protein.aliases.v11.0.txt.gz", skip = 1, header = FALSE, 
+                 col.names = c("STRINGid", "Alias", "source"))[,c(1,2)]
 
-string_v11 <- fread("/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/9606.protein.links.v11.0.txt.gz")
+string_v11 <- fread("/Users/dermit01/Desktop/SCoV2-proteome-atlas-master/string_v11/
+                    9606.protein.links.v11.0.txt.gz")
 gene2string <- (aliases$STRINGid)
 names(gene2string) <- (aliases$Alias)
 ```
@@ -55,8 +58,8 @@ I obtained this function from the authors that is used to generated interaction 
 pull_string_v11 <- function(genes_keep, min_score = 0){
   
   string_genes_keep <- gene2string[genes_keep]
-  string2gene <- names(string_genes_keep); names(string2gene) <- unname(string_genes_keep)
-  #print(paste0("WARNING: ", paste(genes_keep[is.na(string2gene)], collapse = ","), " not found"))
+  string2gene <- names(string_genes_keep)
+  names(string2gene) <- unname(string_genes_keep)
 
     # Now filter
   data <- string_v11 %>% filter(combined_score > min_score) %>%
@@ -108,9 +111,13 @@ Lets name the proteins for further colouring
 ```{r eval=FALSE}
 # Show the full network
 vesicle <- c("RAB7A","RAB6A","RAB1A","SCFD1","USO1", "GDI2")
-viral_rna <- c("ATP1A1","CAPRIN1","CFL1","CSDE1","DDX1","DDX3X","EEF1A1","EEF2","EIF3E","EIF3G","EIF3L","EIF4B","EIF4G1","EIF4H","EIF5A","G3BP1","G3BP2",
-               "HNRNPA1","HNRNPA2B1","IGF2BP1","IGF2BP2","LIN28B","LSM14A","MOV10","PABPC1","PCBP2","PEBP1","PFN1","PPIA","RPL13","RPL15","RPL18A","RPL21",
-               "RPL28","RPL3","RPL36A","RPL6","RPL7A","RPL8","RPS11","RPS12","RPS14","RPS2","RPS26","RPS3","RPS4X","RPS5","SND1","SYNCRIP","UPF1","YBX1")
+viral_rna <- c("ATP1A1","CAPRIN1","CFL1","CSDE1","DDX1","DDX3X",
+               "EEF1A1","EEF2","EIF3E","EIF3G","EIF3L","EIF4B","EIF4G1","EIF4H","EIF5A",
+               "G3BP1","G3BP2","HNRNPA1","HNRNPA2B1","IGF2BP1","IGF2BP2",
+               "LIN28B","LSM14A","MOV10","PABPC1","PCBP2","PEBP1","PFN1","PPIA",
+               "RPL13","RPL15","RPL18A","RPL21",
+               "RPL28","RPL3","RPL36A","RPL6","RPL7A","RPL8","RPS11","RPS12","RPS14",
+               "RPS2","RPS26","RPS3","RPS4X","RPS5","SND1","SYNCRIP","UPF1","YBX1")
 ```
 
 Lets get annotation for colouring
@@ -135,8 +142,10 @@ net %v% "size_of_node" = size_vec
 We can use the function ggnet2 for plotting network objects using ggplot2
 ```{r eval=FALSE}
 set.seed(1)
-pAI <- ggnet2(net, label = levels[color_vec != "Other"], color = "color",  legend.position = "right", mode = "fruchtermanreingold",
-              layout.par = list(repulse.rad = 2000), alpha = 0.75, size = "size_of_node", size.cut = 10,
+pAI <- ggnet2(net, label = levels[color_vec != "Other"], color = "color", 
+              legend.position = "right", mode = "fruchtermanreingold",
+              layout.par = list(repulse.rad = 2000), alpha = 0.75, size = "size_of_node",
+              size.cut = 10,
               palette = c("Other" = "grey", "RP" =  "dodgerblue4", "viral_rna_bind" = "purple2"),
               label.size = 2)  +  guides( size = FALSE)
 
@@ -158,10 +167,12 @@ druggable <- drugs %>% pull(search_term) %>% unique()
 net %v% "drug_target" = levels %in% druggable
 
 set.seed(1)
-pDrug <- ggnet2(net, label = druggable, color = "drug_target",  legend.position = "right", mode = "fruchtermanreingold",
-              layout.par = list(repulse.rad = 2000), alpha = 0.75, size = "size_of_node", size.cut = 10,
-              palette = c("FALSE" = "grey", "TRUE" = "firebrick"),
-              label.size = 2) +  guides( size = FALSE)
+pDrug <- ggnet2(net, label = druggable, color = "drug_target",  legend.position = "right", 
+                mode = "fruchtermanreingold",
+                layout.par = list(repulse.rad = 2000), alpha = 0.75, size = "size_of_node",
+                size.cut = 10,
+                palette = c("FALSE" = "grey", "TRUE" = "firebrick"),
+                label.size = 2) +  guides( size = FALSE)
 pDrug
 
 #ggsave(here("static","img", "pDrug.jpg"))
