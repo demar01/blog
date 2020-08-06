@@ -6,10 +6,20 @@
     <description>Recent content in Blog on Maria Dermit</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Sat, 18 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 25 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Concurso Rladies</title>
+      <link>/blog/concurso-rladies/</link>
+      <pubDate>Sat, 25 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/concurso-rladies/</guid>
+      <description>Florence Nightingale El objetivo de este analysis es conmemorar los 200 años del nacimiento de Florence Nightingale una enfermera y estadistica britanica pionera en visualizacion de datos. Para ello se propone analizar el conjunto de datos que ella utilizó para determinar los factores asociados a la alta mortalidad.
+Florence Nightingale fue la primera mujer que utilizando las conclusiones de sus analysis logro convencer al gobierno birtanico para que impusiera medidas higienicas que llevaron a reducir significativamente las causas de mortalidad del ejército británico durante la guerra de Crimea.</description>
+    </item>
     
     <item>
       <title>Covid-bound proteins</title>
@@ -65,7 +75,7 @@ I start from the premise that any plotting should be done with ggplot2.</descrip
       
       <guid>/blog/2020_06_23_bjtl/</guid>
       <description>UK goverment message In order to know what messages are being twitted by UK’s PM I analysed his timeline. Reporting the most recent 3,200 statuses, it is clear that the number of Brexit messages out-passes Covid-related tweets.
-bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% names() v&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% as.numeric() d&amp;lt;-data.frame(m,v) %&amp;gt;% arrange(v) wordcloud(words = d$m, freq = d$v, min.</description>
+bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% names() v&amp;lt;-bj %&amp;gt;% filter(is_retweet==&amp;quot;FALSE&amp;quot;) %&amp;gt;% pull(hashtags)%&amp;gt;% unlist() %&amp;gt;% table() %&amp;gt;% as.numeric() d&amp;lt;-data.frame(m,v) %&amp;gt;% arrange(v) wc&amp;lt;-wordcloud(words = d$m, freq = d$v, min.</description>
     </item>
     
     <item>
