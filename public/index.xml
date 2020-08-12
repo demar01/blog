@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Maria Dermit</title>
-    <link>/</link>
-    <description>Recent content on Maria Dermit</description>
+    <title>Blog on Maria Dermit</title>
+    <link>/blog/</link>
+    <description>Recent content in Blog on Maria Dermit</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
     <lastBuildDate>Wed, 12 Aug 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -28,15 +28,6 @@
       <guid>/blog/covid-bound-proteins/</guid>
       <description>Motivation to do this exploration A fantastic paper investigating the proteins that bind directly to the SARS-CoV-2 RNA in virally infected human cells has been recently published by Mathias Munschauer group. The authors used purification and mass spectrometry (RAP-MS) to get the proteome that directly binds the SARS-CoV-2 when this infects human cells in an unbiased manner.
 I got super curious about these data and wanted to explore myself. I wanted to visualised the protein-protein interaction (PPI) network of SARS-CoV-2 interacting proteins which certainly will contribute to the understanding of SARS-CoV-2 biology better.</description>
-    </item>
-    
-    <item>
-      <title>LPDG</title>
-      <link>/news/2020_07_10_lpdg/</link>
-      <pubDate>Fri, 10 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_07_10_lpdg/</guid>
-      <description>LPDG What a fantastic talk by Prof. Lennart Martens on the role of ML on proteomics. If you missed the talk, you can now watch it here.</description>
     </item>
     
     <item>
@@ -95,104 +86,6 @@ bj &amp;lt;- get_timeline(&amp;quot;BorisJohnson&amp;quot;, n = 3200) m&amp;lt;-
       <description>How I set up this website The purpose of this post is to show the simple steps how I created this website using Github, Hugo, Rblogdown and Netfily.
 First I create a new repo on my GitHub
  Then I downloaded Hugo, a static site generator and got familiar with the way the information is distributed across folders. I also realise how important choosing the right theme for your purpose is.</description>
-    </item>
-    
-    <item>
-      <title>Mardakheh website</title>
-      <link>/news/2020_06_12_mardakhlanwebsite/</link>
-      <pubDate>Fri, 12 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_06_12_mardakhlanwebsite/</guid>
-      <description> The Mardakheh lab website is live! https://t.co/9VA5GFg2fn
-&amp;mdash; Maria Dermit (@DermitMaria) June 12, 2020  </description>
-    </item>
-    
-    <item>
-      <title>BCI Webinars</title>
-      <link>/news/2020_06_04_bci_june_talk/</link>
-      <pubDate>Thu, 04 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_06_04_bci_june_talk/</guid>
-      <description>Making ribosomes to translate cancer I delivered a talk at BCI Thursday seminar series on our work on regulation of ribosome biogenesis by subcellular RNA localization.
-In this work published in bioarxiv I demonstrated how a RBP called LARP6 regulates ribosome biogenesis in migrating cells. You could watch the full talk (QMUL access only) here</description>
-    </item>
-    
-    <item>
-      <title>RNA2020</title>
-      <link>/news/2020_05_26_rna2020/</link>
-      <pubDate>Tue, 26 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_05_26_rna2020/</guid>
-      <description>RNA2020 On RNA2020 I presented our CLIF (cross-linking and fractionation) method to analyse subcellular localization patterns of human RNA and proteins.</description>
-    </item>
-    
-    <item>
-      <title>WFH Weekly Bulletin</title>
-      <link>/news/2020_05_13_wfh_weekly_bulletin/</link>
-      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_05_13_wfh_weekly_bulletin/</guid>
-      <description>Q&amp;amp;A with Maria Dermit This week I answered some questions for the WFH Weekly Bulletin 📰. I have been fundraising for CRUK as part of the BCI Running Team.
-If you want to join us or donate, please visit.</description>
-    </item>
-    
-    <item>
-      <title>IWD</title>
-      <link>/news/2020_03_08_iwd/</link>
-      <pubDate>Sun, 08 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_03_08_iwd/</guid>
-      <description>WomenInScience On IWD I talked with @QMBCI and sayed what IWD means to me
-Happy #InternationalWomensDay!</description>
-    </item>
-    
-    <item>
-      <title>RNAUK2020</title>
-      <link>/news/2020_01_25_rnauk2020/</link>
-      <pubDate>Sat, 25 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/news/2020_01_25_rnauk2020/</guid>
-      <description>RNA2020 On RNAUK2020 I presented our results on subcellular localization of RP-mRNAs to protrusions.</description>
-    </item>
-    
-    <item>
-      <title>About me</title>
-      <link>/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>My name is Maria Dermit and I am a postdoctoral research assistant at Barts Cancer Institute where I work on big data to understand the importance of post-translational regulation on cancer growth.
-I studied biochemistry, finishing my PhD in 2017. During my academic research I have worked mainly with proteomics and transcriptomics and analysing published data. You can find my PhD thesis here
-The aim of this blog is to write about new tricks I learn about the tidyverse.</description>
-    </item>
-    
-    <item>
-      <title>CV</title>
-      <link>/cv/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/cv/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Home</title>
-      <link>/home/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/home/</guid>
-      <description>Welcome to my blog.
-The main purpose of this blog is to keep track of various projects (including Tidytuesday) and news.</description>
-    </item>
-    
-    <item>
-      <title>Publications</title>
-      <link>/publications/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/publications/</guid>
-      <description>Yu J, Navickas A, Asgharian H, Culbertson B,Fish L, Garcia K, Olegario JP, Dermit M, Dodel M, Hanisch B, Luo Y, Weinberg EM, Dienstmann R, Warren RS, Mardakheh FK and Goodarzi H (2020). RBMS1 suppresses colon cancer metastasis through targeted stabilization of its mRNA regulon Cancer Discovery (DOI: 10.1158/2159-8290.CD-19-1375)
-  Hoi Ting AH, Ogundele O, Hibbert AH, Monfries CAL, Exelby K, Wood NJ, Nevarez-Mejia J, Carbajal MA, Fleck RA, Dermit M, Mardakheh FK, Williams-Ward VC, Pipalia TG, Conte MR, Hughes SM (2020).</description>
     </item>
     
   </channel>
