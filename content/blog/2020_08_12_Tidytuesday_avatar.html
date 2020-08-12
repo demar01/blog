@@ -1,0 +1,225 @@
+---
+title: "Tidytuesday Avatar"
+author: "Maria Dermit"
+date: 2020-08-12
+categories: ["Tidytuesday","Avatar","resampling"]
+---
+
+
+
+<div id="titytuesday-avatar-2020-08-12" class="section level1">
+<h1>Titytuesday Avatar 2020-08-12</h1>
+<pre class="r"><code>library(tidytuesdayR)
+library(tidyverse)
+library(tidymodels)
+library(stringr)</code></pre>
+<div id="getting-data" class="section level3">
+<h3>Getting data</h3>
+<pre class="r"><code>avatar &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv&#39;)
+scene_description &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/scene_description.csv&#39;)</code></pre>
+</div>
+<div id="data-exploration" class="section level3">
+<h3>Data exploration</h3>
+<pre class="r"><code>avatar_summary_chapter&lt;-
+  avatar %&gt;% group_by(book_num,chapter_num) %&gt;% 
+  summarize(mean_rating = mean(imdb_rating, na.rm = TRUE)) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate_if(is.character,as.factor)
+
+avatar_summary_chapter %&gt;% group_by(book_num) %&gt;%  
+  summarize(mean_rating = mean(mean_rating, na.rm = TRUE))  %&gt;% 
+  ggplot(aes(book_num,mean_rating)) +
+  geom_bar(stat=&#39;identity&#39;)+
+  theme(legend.position=&#39;none&#39;)+
+  labs(title = &quot;Imdb rating acroos the three books&quot;,
+  y = &quot;Mean imdb rating&quot;, x = &quot;Book number&quot;)</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-1.png" width="800" /></p>
+<pre class="r"><code>avatar_summary_character&lt;-avatar %&gt;% group_by(character,book_num) %&gt;% 
+  summarize(mean_rating = mean(imdb_rating)) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate_if(is.character,as.factor)
+
+avatar_summary_character %&gt;% 
+ggplot(aes(book_num,mean_rating,group=character))+
+  geom_line(aes(group = character)) +
+  geom_point(aes(color=character))+
+  theme(legend.position=&#39;none&#39;)+
+   labs(title = &quot;Imdb rating associated to each character&quot;,
+  y = &quot;Mean imdb rating&quot;, x = &quot;Book number&quot;)</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-2.png" width="800" /></p>
+<pre class="r"><code>avatar_summary_writer&lt;-avatar %&gt;% group_by(writer,book_num) %&gt;% 
+  summarize(mean_rating = mean(imdb_rating,na.rm=TRUE)) %&gt;% 
+  as_tibble()
+ # mutate_if(is.character,as.factor)
+
+avatar_summary_writer$writer &lt;-avatar_summary_writer$writer %&gt;%  str_trunc(.,30,&quot;right&quot;)
+avatar_summary_writer&lt;-avatar_summary_writer %&gt;% mutate_if(is.character,as.factor)
+
+
+avatar_summary_writer %&gt;% 
+  ggplot(aes(book_num,mean_rating))+
+  geom_line(aes(group = writer, color=writer)) +
+  geom_point(aes( color=writer))+
+  theme(legend.position=&#39;top&#39;)+  
+  labs(title = &quot;Imdb rating associated to each writer&quot;,
+  y = &quot;Mean imdb rating&quot;, x = &quot;Book number&quot;)</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-3.png" width="800" /></p>
+<pre class="r"><code>avatar_summary_director&lt;-avatar %&gt;% group_by(director,book_num) %&gt;% 
+  summarize(mean_rating = mean(imdb_rating,na.rm=TRUE)) %&gt;% 
+  as_tibble() %&gt;% 
+ mutate_if(is.character,as.factor)
+
+avatar_summary_director %&gt;% 
+  ggplot(aes(book_num,mean_rating))+
+  geom_line(aes(group = director, color=director)) +
+  geom_point(aes( color=director))+
+  theme(legend.position=&#39;top&#39;)+  
+  labs(title = &quot;Imdb rating associated to each director&quot;,
+  y = &quot;Mean imdb rating&quot;, x = &quot;Book number&quot;)</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-4.png" width="800" /></p>
+<pre class="r"><code>avatar_summary_director_writer&lt;-avatar %&gt;% group_by(writer,director,book_num) %&gt;% 
+  summarize(mean_rating = mean(imdb_rating,na.rm=TRUE)) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(combination=paste(writer,director,sep=&quot;.&quot;)) 
+
+avatar_summary_director_writer$combination &lt;-avatar_summary_director_writer$combination %&gt;%  str_trunc(.,30,&quot;right&quot;)
+avatar_summary_director_writer&lt;-avatar_summary_director_writer %&gt;% mutate_if(is.character,as.factor)
+
+  #mutate_if(is.character,as.factor)
+
+avatar_summary_director_writer %&gt;% 
+  drop_na() %&gt;% 
+  ggplot(aes(mean_rating,combination))+
+    geom_bar(position=&quot;dodge&quot;, stat=&quot;identity&quot;)+
+    theme(legend.position=&#39;top&#39;)+
+  labs(title = &quot;Imdb rating associated to writer-director combos&quot;,
+  x = &quot;Mean imdb rating&quot;, y = &quot;&quot;)</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-5.png" width="800" /></p>
+<p>It looks like episodes associated to later books got a slightly better Imdb rating. Some characters tend to be associated with better Imdb rating. Also it seems that episodes based on chapters written by some authors get very different Imdb rating. For instance episodes based on Book 1 chapters written by some authors got low Imdb rating and those authors did not participate writting chapters in Book 2 and Book 3. It looks like some star author(s) were hired for the last book, and this chapter got highest Imdb rating. Finally, some directors that directed episodes based on Book 2 and 3 got pretty high rating, and it looks like those directors were hired for one season only.</p>
+<p>Some writers may be writing more about popular characters and likewisely some episodes directed by some directors may have higher presence of some popular characters, which may be pushing higher Imdb rates these artist may eventually receive. Maybe a combination of best writers and directors gives the top rates.</p>
+<p>Next question we have is what parameters are driving Imdb rating?</p>
+<pre class="r"><code>avatar_simple&lt;-avatar %&gt;% 
+  select(character,book_num,chapter_num,writer,director,imdb_rating) %&gt;% 
+  dplyr::mutate(book_num = replace_na(book_num, 0),
+                chapter_num = replace_na(chapter_num, 0),
+                imdb_rating= replace_na(imdb_rating, 0),
+                character= replace_na(character, 0),
+                ) %&gt;% 
+  dplyr::filter(imdb_rating!=0) %&gt;% 
+  mutate(imdb_rating = case_when(
+    imdb_rating &gt; 8.75 ~ &quot;high&quot;,
+      imdb_rating &lt; 8.75 ~ &quot;low&quot;)) %&gt;% unique()%&gt;%  
+    na.omit() %&gt;% 
+    mutate_if(is.character, factor) %&gt;% 
+
+  janitor::clean_names() %&gt;% 
+  mutate(character = fct_lump(character,100))
+
+avatar_simple %&gt;% count(imdb_rating)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   imdb_rating     n
+##   &lt;fct&gt;       &lt;int&gt;
+## 1 high          474
+## 2 low           475</code></pre>
+<p>We can consider an Imdb rating as low if this is &lt;8.75 and high if Imdb rating is &gt;8.75</p>
+</div>
+<div id="building-models-with-recipes" class="section level3">
+<h3>Building models with recipes</h3>
+<pre class="r"><code>avatar_split &lt;- initial_split(avatar_simple, strata = imdb_rating)
+avatar_train &lt;- training(avatar_split)
+avatar_test &lt;- testing(avatar_split)
+
+avatar_rec &lt;- recipe(imdb_rating ~ ., data = avatar_train) %&gt;%
+# update_role(id, new_role = &quot;ID&quot;) %&gt;%
+  step_dummy(all_nominal(), -all_outcomes()) %&gt;%
+  step_zv(all_numeric()) %&gt;%
+  step_normalize(all_numeric())
+
+avatar_prep &lt;- avatar_rec %&gt;%prep()
+avatar_juiced &lt;- juice(avatar_prep)
+
+glm_spec &lt;- logistic_reg() %&gt;%
+  set_engine(&quot;glm&quot;)
+
+glm_fit &lt;- glm_spec %&gt;%
+  fit(imdb_rating ~ ., data = avatar_juiced)
+
+knn_spec &lt;- nearest_neighbor() %&gt;%
+  set_engine(&quot;kknn&quot;) %&gt;%
+  set_mode(&quot;classification&quot;)
+
+knn_fit &lt;- knn_spec %&gt;%
+  fit(imdb_rating ~ ., data = avatar_juiced)
+
+tree_spec &lt;- decision_tree() %&gt;%
+  set_engine(&quot;rpart&quot;) %&gt;%
+  set_mode(&quot;classification&quot;)
+
+tree_fit &lt;- tree_spec %&gt;%
+  fit(imdb_rating ~ ., data = avatar_juiced)</code></pre>
+</div>
+<div id="we-can-now-evaluate-the-models-with-resampling" class="section level3">
+<h3>We can now evaluate the models with resampling</h3>
+<pre class="r"><code>set.seed(2020)
+folds &lt;- vfold_cv(avatar_train, strata = imdb_rating)</code></pre>
+<p>We can estimate the models metrics</p>
+<pre class="r"><code>set.seed(234)
+glm_rs &lt;- glm_spec %&gt;%
+  fit_resamples(
+    avatar_rec,
+    folds,
+    metrics = metric_set(roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE)
+  )
+
+set.seed(234)
+knn_rs &lt;- knn_spec %&gt;%
+  fit_resamples(
+    avatar_rec,
+    folds,
+    metrics = metric_set(roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE)
+  )
+
+set.seed(234)
+tree_rs &lt;- tree_spec %&gt;%
+  fit_resamples(
+    avatar_rec,
+    folds,
+    metrics = metric_set(roc_auc, sens, spec),
+    control = control_resamples(save_pred = TRUE)
+  )
+
+glm_rs %&gt;%
+  unnest(.predictions) %&gt;%
+  mutate(model = &quot;glm&quot;) %&gt;%
+  bind_rows(knn_rs %&gt;%
+    unnest(.predictions) %&gt;%
+    mutate(model = &quot;knn&quot;)) %&gt;%
+  group_by(model) %&gt;%
+  roc_curve(imdb_rating, .pred_high) %&gt;%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+  geom_line(size = 1.5) +
+  geom_abline(
+    lty = 2, alpha = 0.5,
+    color = &quot;gray50&quot;,
+    size = 1.2
+  )</code></pre>
+<p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-7-1.png" width="800" />
+Logistic regression model performs a bit better, so we can look at the parameters in detail.</p>
+<pre class="r"><code>glm_fit %&gt;%
+  tidy() %&gt;%
+  dplyr::filter(p.value&lt;0.05) %&gt;% 
+  arrange(-estimate)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   term                           estimate std.error statistic  p.value
+##   &lt;chr&gt;                             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 writer_John.O.Bryan               0.830     0.198      4.19 2.75e- 5
+## 2 writer_Tim.Hedrick                0.679     0.192      3.54 3.97e- 4
+## 3 writer_Elizabeth.Welch.Ehasz     -0.750     0.233     -3.21 1.31e- 3
+## 4 writer_Michael.Dante.DiMartino   -0.760     0.196     -3.87 1.10e- 4
+## 5 book_num                         -1.54      0.295     -5.20 2.00e- 7
+## 6 chapter_num                      -2.15      0.260     -8.28 1.24e-16</code></pre>
+<p>Episodes based on scripts written by John.O.Bryan and Tim Hedrick are more likely to get lower Imdb ratings and episodes based on latest books get higher Imdb ratings .</p>
+</div>
+</div>
