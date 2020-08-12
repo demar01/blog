@@ -4,41 +4,66 @@
   
   <url>
     <loc>/blog/</loc>
-    <lastmod>2020-06-26T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-06-26T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2020_06_26_spotify/</loc>
-    <lastmod>2020-06-26T00:00:00+00:00</lastmod>
+    <loc>/blog/tidytuesday-avatar/</loc>
+    <lastmod>2020-08-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2020_06_24_ukgoverment_message/</loc>
-    <lastmod>2020-06-24T00:00:00+00:00</lastmod>
+    <loc>/blog/covid-bound-proteins/</loc>
+    <lastmod>2020-07-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/blog/2020_06_21_dataviz/</loc>
-    <lastmod>2020-06-23T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/blog/2015-06-22-r-rmarkdown/</loc>
-    <lastmod>2020-06-23T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/news/2020_06_12_mardakhlanwebsite/</loc>
-    <lastmod>2020-06-12T00:00:00+00:00</lastmod>
+    <loc>/news/2020_07_10_lpdg/</loc>
+    <lastmod>2020-07-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/news/</loc>
+    <lastmod>2020-07-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/xgboost-phosphoproteome/</loc>
+    <lastmod>2020-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/diversity/</loc>
+    <lastmod>2020-06-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/spotify/</loc>
+    <lastmod>2020-06-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/dataviz/</loc>
+    <lastmod>2020-06-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/2020_06_23_bjtl/</loc>
+    <lastmod>2020-06-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/rblogdown/</loc>
+    <lastmod>2020-06-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/news/2020_06_12_mardakhlanwebsite/</loc>
     <lastmod>2020-06-12T00:00:00+00:00</lastmod>
   </url>
   
@@ -69,6 +94,10 @@
   
   <url>
     <loc>/about/</loc>
+  </url>
+  
+  <url>
+    <loc>/cv/</loc>
   </url>
   
   <url>
