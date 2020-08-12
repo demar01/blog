@@ -6,19 +6,18 @@
     <description>Recent content in Blog on Maria Dermit</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Sat, 25 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 12 Aug 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Concurso Rladies</title>
-      <link>/blog/concurso-rladies/</link>
-      <pubDate>Sat, 25 Jul 2020 00:00:00 +0000</pubDate>
+      <title>Tidytuesday Avatar</title>
+      <link>/blog/tidytuesday-avatar/</link>
+      <pubDate>Wed, 12 Aug 2020 00:00:00 +0000</pubDate>
       
-      <guid>/blog/concurso-rladies/</guid>
-      <description>Florence Nightingale El objetivo de este analysis es conmemorar los 200 años del nacimiento de Florence Nightingale una enfermera y estadistica britanica pionera en visualizacion de datos. Para ello se propone analizar el conjunto de datos que ella utilizó para determinar los factores asociados a la alta mortalidad.
-Florence Nightingale fue la primera mujer que utilizando las conclusiones de sus analysis logro convencer al gobierno birtanico para que impusiera medidas higienicas que llevaron a reducir significativamente las causas de mortalidad del ejército británico durante la guerra de Crimea.</description>
+      <guid>/blog/tidytuesday-avatar/</guid>
+      <description>Titytuesday Avatar 2020-08-12 library(tidytuesdayR) library(tidyverse) library(tidymodels) library(stringr) Getting data avatar &amp;lt;- readr::read_csv(&amp;#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv&amp;#39;) scene_description &amp;lt;- readr::read_csv(&amp;#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/scene_description.csv&amp;#39;)  Data exploration avatar_summary_chapter&amp;lt;- avatar %&amp;gt;% group_by(book_num,chapter_num) %&amp;gt;% summarize(mean_rating = mean(imdb_rating, na.rm = TRUE)) %&amp;gt;% as_tibble() %&amp;gt;% mutate_if(is.character,as.factor) avatar_summary_chapter %&amp;gt;% group_by(book_num) %&amp;gt;% summarize(mean_rating = mean(mean_rating, na.rm = TRUE)) %&amp;gt;% ggplot(aes(book_num,mean_rating)) + geom_bar(stat=&amp;#39;identity&amp;#39;)+ theme(legend.position=&amp;#39;none&amp;#39;)+ labs(title = &amp;quot;Imdb rating acroos the three books&amp;quot;, y = &amp;quot;Mean imdb rating&amp;quot;, x = &amp;quot;Book number&amp;quot;) avatar_summary_character&amp;lt;-avatar %&amp;gt;% group_by(character,book_num) %&amp;gt;% summarize(mean_rating = mean(imdb_rating)) %&amp;gt;% as_tibble() %&amp;gt;% mutate_if(is.</description>
     </item>
     
     <item>
