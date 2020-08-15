@@ -1,0 +1,126 @@
+---
+title: "Sentiment analysis of Genius songs lyrics"
+author: "Maria Dermit"
+date: 2020-08-14
+categories: ["Sentiment analysis","Genius","Tidytext"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, echo=TRUE, 
+                      dpi = 100, fig.width = 8,fig.height = 5)
+library(tidyverse)
+library(genius)
+library(tidytext)
+library(tidymodels)
+library(blogdown)
+
+```
+# Sentiment analysis on Katty Perry upcoming album Smile. 
+
+Smile is the upcoming sixth studio album by American singer Katy Perry. It is scheduled to be released in two weeks time, on  August 28 2020. Perry describes her last album [Smile](https://en.wikipedia.org/wiki/Smile_(Katy_Perry_album)) as her "journey towards the light, with stories of resilience, hope, and love". According to her, she has gone through some emotionally challenged times lately, and expecting a child could just add more into that emotional roller coaster `r emo::ji("roller_coaster")`.
+
+![](https://media.giphy.com/media/kz0hq1srTy59CL9F9j/giphy.gif)
+
+```{r}
+library(tidyverse)
+library(genius)
+library(tidytext)
+library(tidymodels)
+library(blogdown)
+```
+I am going to obtain the lyrics of that album trough [Genius](https://genius.com/) (world's biggest collection of song lyrics and musical knowledge) using the [genius package](https://github.com/JosiahParry/genius).
+
+### Getting data
+```{r}
+smile_raw<-genius_album(artist = "Katy Perry", album = "Smile")
+```
+
+### Data preparation 
+```{r}
+tidy_smile <- smile_raw %>%
+  unnest_tokens(word, lyric)
+
+tidy_smile  %>% count(track_title)
+smile_raw %>% filter(track_title=="Tucked")
+
+
+```
+We can do text analysis using the fantastic [tidytext package](https://github.com/juliasilge/tidytext). To use tidytext, we need to tokenise words to extract meaning and use tidytext's sentiment analysis capabilities.
+We can use `unnest_tokens` function uses the tokenizers package to separate each lyric line into words. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
+We realised the lyrics of some songs have yet to be released.
+
+```{r}
+tidy_smile <- tidy_smile %>%
+  anti_join(get_stopwords())
+
+```
+We can remove stop words (available via the function `get_stopwords()`) with an anti_join().
+Lets count the frequency of words.
+```{r}
+tidy_smile %>%
+  count(word, sort = TRUE) 
+
+```
+There is a range of methods and dictionaries  for evaluating the opinion or emotion in text. The tidytext package comes with several sentiment lexicons. 
+```{r}
+get_sentiments("bing") %>% count(sentiment)
+get_sentiments("nrc") %>% count(sentiment)
+get_sentiments("loughran") %>% count(sentiment)
+```
+
+### Sentiment analysis
+In this analysis I am going to use 2 lexicons:
+
+- [*bing* by Liu and collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html)
+
+- [*nrc* by Saif Mohammad and Peter Turney.](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)
+
+```{r}
+smile_sentiment <- tidy_smile %>%
+  inner_join(get_sentiments("bing"), by = "word") %>% 
+  count(track_title, sentiment) %>% 
+  spread(sentiment, n, fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+smile_sentiment
+
+smile_sentiment_nrc <- tidy_smile %>%
+  inner_join(get_sentiments("nrc"), by = "word") %>% 
+  count(track_title, sentiment) 
+smile_sentiment_nrc
+
+```
+### Plotting the data  
+```{r eval=FALSE}
+ggplot(smile_sentiment, aes(track_title, sentiment, fill = track_title)) +
+  geom_bar(stat = "identity", show.legend = FALSE)+
+   theme_minimal(base_family = "")+
+  theme(plot.title.position = "plot")+
+  labs(x = "",
+         y = "Sentiment",
+         title = "Sentiment analysis per words across songs",
+         subtitle = "Katty Perry's last album Smile")
+```
+![BJTL](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_14_Sentimel_analysis_Genius_songs_files/figure-html/Rplot00.png)
+
+Despite the song called Daisies could sound bucolic, the song titled with this name has lowest sentiment rating (a.k.a more negative-associated words than positive-associated words).
+
+```{r eval=FALSE}
+ggplot(smile_sentiment_nrc, aes( n,sentiment, fill = track_title)) +
+  geom_bar(stat = "identity", show.legend = FALSE)+
+  theme_minimal(base_family = "")+
+  theme(plot.title.position = "plot")+
+  facet_wrap(~track_title, ncol = 2, scales="free") +
+  labs(x = "",
+         y = "Sentiment",title = "Sentiment analysis per words across songs",
+         subtitle = "Katty Perry's last album Smile")
+```
+![nrc](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_14_Sentimel_analysis_Genius_songs_files/figure-html/Rplot01.png)
+Overall, the songs have quite positive feelings/sentiments. Smile song has many positive and joyful terms and little fear-associated words. On the other hand, Daisies song, is the saddest song of the album, having as much fear as positive associated words and little joy.
+
+Therefore, if you want to listen to the latest, more positive Katty Perry, click on the video image to watch her last song Smile `r emo::ji("smile")`!
+
+[![KP](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/ScreenShot_KP.png)](https://www.youtube.com/watch?v=vZA5heWazIQ)
+
+
+
+

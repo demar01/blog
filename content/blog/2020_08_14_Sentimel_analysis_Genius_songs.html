@@ -1,0 +1,174 @@
+---
+title: "Sentiment analysis of Genius songs lyrics"
+author: "Maria Dermit"
+date: 2020-08-14
+categories: ["Sentiment analysis","Genius","Tidytext"]
+---
+
+
+
+<div id="sentiment-analysis-on-katty-perry-upcoming-album-smile." class="section level1">
+<h1>Sentiment analysis on Katty Perry upcoming album Smile.</h1>
+<p>Smile is the upcoming sixth studio album by American singer Katy Perry. It is scheduled to be released in two weeks time, on August 28 2020. Perry describes her last album <a href="https://en.wikipedia.org/wiki/Smile_(Katy_Perry_album)">Smile</a> as her “journey towards the light, with stories of resilience, hope, and love”. According to her, she has gone through some emotionally challenged times lately, and expecting a child could just add more into that emotional roller coaster 🎢.</p>
+<p><img src="https://media.giphy.com/media/kz0hq1srTy59CL9F9j/giphy.gif" /></p>
+<pre class="r"><code>library(tidyverse)
+library(genius)
+library(tidytext)
+library(tidymodels)
+library(blogdown)</code></pre>
+<p>I am going to obtain the lyrics of that album trough <a href="https://genius.com/">Genius</a> (world’s biggest collection of song lyrics and musical knowledge) using the <a href="https://github.com/JosiahParry/genius">genius package</a>.</p>
+<div id="getting-data" class="section level3">
+<h3>Getting data</h3>
+<pre class="r"><code>smile_raw&lt;-genius_album(artist = &quot;Katy Perry&quot;, album = &quot;Smile&quot;)</code></pre>
+</div>
+<div id="data-preparation" class="section level3">
+<h3>Data preparation</h3>
+<pre class="r"><code>tidy_smile &lt;- smile_raw %&gt;%
+  unnest_tokens(word, lyric)
+
+tidy_smile  %&gt;% count(track_title)</code></pre>
+<pre><code>## # A tibble: 12 x 2
+##    track_title                  n
+##    &lt;chr&gt;                    &lt;int&gt;
+##  1 Champagne Problems          18
+##  2 Cry About It Later          92
+##  3 Daisies                      1
+##  4 Harleys in Hawaii          339
+##  5 Never Really Over            1
+##  6 Not the End of the World    60
+##  7 Only Love                   18
+##  8 Resilient                  213
+##  9 Smile                      333
+## 10 Teary Eyes                  81
+## 11 Tucked                       1
+## 12 What Makes a Woman           1</code></pre>
+<pre class="r"><code>smile_raw %&gt;% filter(track_title==&quot;Tucked&quot;)</code></pre>
+<pre><code>## # A tibble: 1 x 4
+##   track_n  line lyric track_title
+##     &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt;      
+## 1       9    NA &lt;NA&gt;  Tucked</code></pre>
+<p>We can do text analysis using the fantastic <a href="https://github.com/juliasilge/tidytext">tidytext package</a>. To use tidytext, we need to tokenise words to extract meaning and use tidytext’s sentiment analysis capabilities.
+We can use <code>unnest_tokens</code> function uses the tokenizers package to separate each lyric line into words. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
+We realised the lyrics of some songs have yet to be released.</p>
+<pre class="r"><code>tidy_smile &lt;- tidy_smile %&gt;%
+  anti_join(get_stopwords())</code></pre>
+<p>We can remove stop words (available via the function <code>get_stopwords()</code>) with an anti_join().
+Lets count the frequency of words.</p>
+<pre class="r"><code>tidy_smile %&gt;%
+  count(word, sort = TRUE) </code></pre>
+<pre><code>## # A tibble: 233 x 2
+##    word         n
+##    &lt;chr&gt;    &lt;int&gt;
+##  1 smile       19
+##  2 oh          17
+##  3 baby        16
+##  4 back        15
+##  5 now         15
+##  6 cause       13
+##  7 finally     12
+##  8 got         11
+##  9 grateful    11
+## 10 jeweler     11
+## # … with 223 more rows</code></pre>
+<p>There is a range of methods and dictionaries for evaluating the opinion or emotion in text. The tidytext package comes with several sentiment lexicons.</p>
+<pre class="r"><code>get_sentiments(&quot;bing&quot;) %&gt;% count(sentiment)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   sentiment     n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 negative   4781
+## 2 positive   2005</code></pre>
+<pre class="r"><code>get_sentiments(&quot;nrc&quot;) %&gt;% count(sentiment)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    sentiment        n
+##    &lt;chr&gt;        &lt;int&gt;
+##  1 anger         1247
+##  2 anticipation   839
+##  3 disgust       1058
+##  4 fear          1476
+##  5 joy            689
+##  6 negative      3324
+##  7 positive      2312
+##  8 sadness       1191
+##  9 surprise       534
+## 10 trust         1231</code></pre>
+<pre class="r"><code>get_sentiments(&quot;loughran&quot;) %&gt;% count(sentiment)</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   sentiment        n
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 constraining   184
+## 2 litigious      904
+## 3 negative      2355
+## 4 positive       354
+## 5 superfluous     56
+## 6 uncertainty    297</code></pre>
+</div>
+<div id="sentiment-analysis" class="section level3">
+<h3>Sentiment analysis</h3>
+<p>In this analysis I am going to use 2 lexicons:</p>
+<ul>
+<li><p><a href="https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html"><em>bing</em> by Liu and collaborators</a></p></li>
+<li><p><a href="http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm"><em>nrc</em> by Saif Mohammad and Peter Turney.</a></p></li>
+</ul>
+<pre class="r"><code>smile_sentiment &lt;- tidy_smile %&gt;%
+  inner_join(get_sentiments(&quot;bing&quot;), by = &quot;word&quot;) %&gt;% 
+  count(track_title, sentiment) %&gt;% 
+  spread(sentiment, n, fill = 0) %&gt;% 
+  mutate(sentiment = positive - negative)
+smile_sentiment</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   track_title              negative positive sentiment
+##   &lt;chr&gt;                       &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Cry About It Later              5        6         1
+## 2 Harleys in Hawaii               0        4         4
+## 3 Not the End of the World        4        2        -2
+## 4 Resilient                       6       15         9
+## 5 Smile                          13       56        43
+## 6 Teary Eyes                      0        4         4</code></pre>
+<pre class="r"><code>smile_sentiment_nrc &lt;- tidy_smile %&gt;%
+  inner_join(get_sentiments(&quot;nrc&quot;), by = &quot;word&quot;) %&gt;% 
+  count(track_title, sentiment) 
+smile_sentiment_nrc</code></pre>
+<pre><code>## # A tibble: 50 x 3
+##    track_title        sentiment        n
+##    &lt;chr&gt;              &lt;chr&gt;        &lt;int&gt;
+##  1 Cry About It Later anticipation     5
+##  2 Cry About It Later joy              4
+##  3 Cry About It Later negative         8
+##  4 Cry About It Later positive         5
+##  5 Cry About It Later sadness          4
+##  6 Cry About It Later surprise         1
+##  7 Cry About It Later trust            1
+##  8 Harleys in Hawaii  anger            1
+##  9 Harleys in Hawaii  anticipation     4
+## 10 Harleys in Hawaii  disgust          1
+## # … with 40 more rows</code></pre>
+</div>
+<div id="plotting-the-data" class="section level3">
+<h3>Plotting the data</h3>
+<pre class="r"><code>ggplot(smile_sentiment, aes(track_title, sentiment, fill = track_title)) +
+  geom_bar(stat = &quot;identity&quot;, show.legend = FALSE)+
+   theme_minimal(base_family = &quot;&quot;)+
+  theme(plot.title.position = &quot;plot&quot;)+
+  labs(x = &quot;&quot;,
+         y = &quot;Sentiment&quot;,
+         title = &quot;Sentiment analysis per words across songs&quot;,
+         subtitle = &quot;Katty Perry&#39;s last album Smile&quot;)</code></pre>
+<div class="figure">
+<img src="https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_14_Sentimel_analysis_Genius_songs_files/figure-html/Rplot00.png" alt="" />
+<p class="caption">BJTL</p>
+</div>
+<p>Despite the song called Daisies could sound bucolic, the song titled with this name has lowest sentiment rating (a.k.a more negative-associated words than positive-associated words).</p>
+<pre class="r"><code>ggplot(smile_sentiment_nrc, aes( n,sentiment, fill = track_title)) +
+  geom_bar(stat = &quot;identity&quot;, show.legend = FALSE)+
+  theme_minimal(base_family = &quot;&quot;)+
+  theme(plot.title.position = &quot;plot&quot;)+
+  facet_wrap(~track_title, ncol = 2, scales=&quot;free&quot;) +
+  labs(x = &quot;&quot;,
+         y = &quot;Sentiment&quot;,title = &quot;Sentiment analysis per words across songs&quot;,
+         subtitle = &quot;Katty Perry&#39;s last album Smile&quot;)</code></pre>
+<p><img src="https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_14_Sentimel_analysis_Genius_songs_files/figure-html/Rplot01.png" alt="nrc" />
+Overall, the songs have quite positive feelings/sentiments. Smile song has many positive and joyful terms and little fear-associated words. On the other hand, Daisies song, is the saddest song of the album, having as much fear as positive associated words and little joy.</p>
+<p>Therefore, if you want to listen to the latest, more positive Katty Perry, click on the video image to watch her last song Smile 😄!</p>
+<p><a href="https://www.youtube.com/watch?v=vZA5heWazIQ"><img src="https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/ScreenShot_KP.png" alt="KP" /></a></p>
+</div>
+</div>

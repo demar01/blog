@@ -7,8 +7,8 @@ categories: ["Tidytuesday","Avatar","resampling"]
 
 
 
-<div id="titytuesday-avatar-2020-08-12" class="section level1">
-<h1>Titytuesday Avatar 2020-08-12</h1>
+<div id="tidytuesday-avatar-2020-08-12" class="section level1">
+<h1>Tidytuesday Avatar 2020-08-12</h1>
 <pre class="r"><code>library(tidytuesdayR)
 library(tidyverse)
 library(tidymodels)
@@ -95,8 +95,8 @@ avatar_summary_director_writer %&gt;%
   labs(title = &quot;Imdb rating associated to writer-director combos&quot;,
   x = &quot;Mean imdb rating&quot;, y = &quot;&quot;)</code></pre>
 <p><img src="/blog/2020_08_12_Tidytuesday_avatar_files/figure-html/unnamed-chunk-3-5.png" width="800" /></p>
-<p>It looks like episodes associated to later books got a slightly better Imdb rating. Some characters tend to be associated with better Imdb rating. Also it seems that episodes based on chapters written by some authors get very different Imdb rating. For instance episodes based on Book 1 chapters written by some authors got low Imdb rating and those authors did not participate writting chapters in Book 2 and Book 3. It looks like some star author(s) were hired for the last book, and this chapter got highest Imdb rating. Finally, some directors that directed episodes based on Book 2 and 3 got pretty high rating, and it looks like those directors were hired for one season only.</p>
-<p>Some writers may be writing more about popular characters and likewisely some episodes directed by some directors may have higher presence of some popular characters, which may be pushing higher Imdb rates these artist may eventually receive. Maybe a combination of best writers and directors gives the top rates.</p>
+<p>It looks like episodes associated to later books got a slightly better Imdb rating. Some characters tend to be associated with better Imdb rating. Also it seems that episodes based on chapters written by some authors get very different Imdb rating. For instance episodes based on Book 1 chapters written by some authors got low Imdb rating and those authors did not participate writing chapters in Book 2 and Book 3. It looks like some star author(s) were hired for the last book, and those chapters got highest Imdb rating. Finally, some directors that directed episodes based on Book 2 and 3 got pretty high rating, and it looks like those directors were hired for one season only.</p>
+<p>Some writers may be writing more about popular characters and likewise some episodes directed by some directors may have higher presence of some popular characters, which may be pushing higher Imdb rates these artist may eventually receive. Maybe a combination of best writers and directors gives the top rates.</p>
 <p>Next question we have is what parameters are driving Imdb rating?</p>
 <pre class="r"><code>avatar_simple&lt;-avatar %&gt;% 
   select(character,book_num,chapter_num,writer,director,imdb_rating) %&gt;% 

@@ -14,7 +14,7 @@ library(tidymodels)
 library(stringr)
 
 ```
-# Titytuesday Avatar 2020-08-12
+# Tidytuesday Avatar 2020-08-12
 ```{r}
 library(tidytuesdayR)
 library(tidyverse)
@@ -109,9 +109,9 @@ avatar_summary_director_writer %>%
   x = "Mean imdb rating", y = "")
 ```
 
-It looks like episodes associated to later books got a slightly better Imdb rating. Some characters tend to be associated with better Imdb rating. Also it seems that episodes based on chapters written by some authors get very different Imdb rating. For instance episodes based on Book 1 chapters written by some authors got low Imdb rating and those authors did not participate writting chapters in Book 2 and Book 3. It looks like some star author(s) were hired for the last book, and this chapter got highest Imdb rating. Finally, some directors that directed episodes based on Book 2 and 3 got pretty high rating, and it looks like those directors were hired for one season only.
+It looks like episodes associated to later books got a slightly better Imdb rating. Some characters tend to be associated with better Imdb rating. Also it seems that episodes based on chapters written by some authors get very different Imdb rating. For instance episodes based on Book 1 chapters written by some authors got low Imdb rating and those authors did not participate writing chapters in Book 2 and Book 3. It looks like some star author(s) were hired for the last book, and those chapters got highest Imdb rating. Finally, some directors that directed episodes based on Book 2 and 3 got pretty high rating, and it looks like those directors were hired for one season only.
 
-Some writers may be writing more about popular characters and likewisely some episodes directed by some directors may have higher presence of some popular characters, which may be pushing higher Imdb rates these artist may eventually receive. Maybe a combination of best writers and directors gives the top rates. 
+Some writers may be writing more about popular characters and likewise some episodes directed by some directors may have higher presence of some popular characters, which may be pushing higher Imdb rates these artist may eventually receive. Maybe a combination of best writers and directors gives the top rates. 
 
 Next question we have is what parameters are driving Imdb rating? 
 
