@@ -1,0 +1,234 @@
+---
+title: "Cancer-related preprints during the COVID-19 pandemic"
+author: "Maria Dermit"
+date: '2020-08-21'
+categories:
+- API
+- Web scraping
+- Prepints
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, echo=TRUE, 
+                      dpi = 100, fig.width = 8,fig.height = 5)
+library(tidyverse)
+library(rcrossref) # to access DOIs registered with Crossref 
+library(roadoi) # to link DOIs-open access versions of papers
+library(rvest) # to Harvest (Scrape) Web Pages
+library(rentrez) # to get data from NCBI
+library(XML) # to parse XML document
+library(lubridate) # to deal with dates
+
+```
+# Impact of COVID-19 pandemic on cancer-related preprints. 
+
+It may seem evident that preprints have served as an unprecedent way of communicating scientific results during COVID-19 pandemic. I recently found a very interesting paper that investigates the attributes of COVID-19 preprints (including preprinting and publishing behaviour) and the impact of the pandemic on the scientific publishing landscape published in [bioarxiv](https://www.biorxiv.org/content/10.1101/2020.05.22.111294v1). 
+After seeing this paper I wonder how much cancer-related preprints were affected during the pandemic `r emo::ji("question")`
+
+
+```{r}
+library(tidyverse)
+library(rcrossref) # to access DOIs registered with Crossref 
+library(roadoi) # to link DOIs and open access versions of papers
+library(rvest) # to Harvest (Scrape) Web Pages. Parsing of HTML/XML files 
+library(rentrez) # to get data from NCBI
+library(XML) # to parse XML document
+library(lubridate) # to deal with dates
+
+```
+To answer that question I am going to obtained data that expands from one year before the declaration of pandemic (that's it from 31^st^ December 2018) up to the day I started this analysis (18^th^ August 2020). I am also going to use some of the functions the authors use in the paper that were made publicly available on [github.](https://github.com/preprinting-a-pandemic/pandemic_preprints)
+
+### Retrieve preprint metadata via bioRxiv API
+
+```{r,eval=FALSE}
+
+max_results_per_page <- 100 
+base_url <- "https://api.biorxiv.org/details/"
+
+start <- "2018-12-31"
+end <- "2020-08-18"
+
+getPreprintData <- function(server) {
+  
+  # Make initial request
+  url <- paste0(base_url, server, "/", start, "/", end, "/", 0)
+  request <- httr::GET(url = url)
+  content <- httr::content(request, as = "parsed")
+  
+  # Determine total number of results and required iterations for paging
+  total_results <- content$messages[[1]]$total
+  pages <- ceiling(total_results / max_results_per_page) - 1
+  
+  data <- content$collection
+  
+  for (i in 1:pages) {
+    cursor <- format(i * max_results_per_page, scientific = FALSE) 
+    # otherwise page 100000 becomes 1e05, which the api does not recognise
+    url <- paste0(base_url, server, "/", start, "/", end, "/", cursor)
+    request <- httr::RETRY("GET", url, times = 5, pause_base = 1, 
+                           pause_cap = 60) # retry if server error
+    content <- httr::content(request, as = "parsed")
+    if(content$messages[[1]]$status == "ok") {
+      data <- c(data, content$collection)
+    } else {
+      data <- c(data, list("error" = content$messages[[1]]$status))
+    }
+    Sys.sleep(1) 
+  }
+  return(data)
+}
+```
+ The we can retrieve data from biorxiv and medrxiv using the 
+ `getPreprintData` function.
+```{r, eval=FALSE}
+preprint_data <- purrr::map(c("biorxiv", "medrxiv"), getPreprintData)
+```
+
+This dataset is quite extensive, and retrieving all these data took a while to finish on my computer. Therefore, I am going to convert the obtained data into a tibble, do some transformations on it and safe the final tibble for future access.  
+ 
+```{r,eval=FALSE}
+
+parsePreprintData <- function(item) {
+  tibble(
+    source = item$server,
+    doi = item$doi,
+    title = item$title,
+    authors = item$authors,
+    author_corresponding = item$author_corresponding, 
+    author_corresponding_institution = item$author_corresponding_institution,
+    posted_date = item$date,
+    version = item$version,
+    license = item$license,
+    type = item$type,
+    category = item$category,
+    abstract = item$abstract,
+    is_published = item$published != "NA",
+    published_doi = if(item$published == "NA") NA_character_ else item$published
+  )
+}
+
+# Build a search string containing terms related to COVID-19
+search_string_covid <- "coronavirus|covid-19|sars-cov|ncov-2019|
+2019-ncov|hcov-19|sars-2"
+
+# Build a search string containing terms related to cancer
+search_string_cancer <- "cancer|tumor|adenocarcinoma|neoplasm|
+carcinoma"
+
+# Set date of first case of COVID-19
+covid_start <- "2019-12-31"
+
+# Parse data to dataframe
+preprints_all <- map_dfr(preprint_data, ~ map_df(.x, parsePreprintData)) %>%
+  group_by(doi) %>%
+  # calculate number of versions of a preprint and number of authors
+  mutate(n_versions = n()) %>%
+  ungroup() %>%
+  # keep the first version record
+  filter(version == 1) %>%
+  select(-version) %>%
+  mutate(
+    # clean up DOIs for later matching
+    doi = str_trim(str_to_lower(doi)),
+    published_doi = str_trim(str_to_lower(published_doi)),
+    covid_preprint = case_when(
+      str_detect(title, regex(search_string_covid, ignore_case = TRUE)) & posted_date > covid_start ~ "covid", 
+      str_detect(abstract, regex(search_string_covid, ignore_case = TRUE)) & posted_date > covid_start ~ "covid",
+      str_detect(title, regex(search_string_cancer, ignore_case = TRUE))  ~ "cancer", 
+      str_detect(abstract, regex(search_string_cancer, ignore_case = TRUE)) ~ "cancer",
+      T ~ "other"),
+    n_authors = map_int(authors, ~length(strsplit(., split = ";")[[1]]))
+    ) %>%
+  # some duplicates are included
+  distinct() %>%
+  # reorder elements
+  select(source, doi, posted_date, covid_preprint, title, 
+         abstract, n_versions, license, type, category, authors, n_authors,   
+         author_corresponding, author_corresponding_institution,
+         is_published, published_doi)
+```
+
+```{r, eval=FALSE}
+preprints_all %>% 
+    write_csv("data/preprints_basic_20181231_20200818.csv")
+```
+
+To safe the data and also be able to uploaded into Github (files size limit on Github is 100Mb), I am going to into split the data into two parts: 
+-Preprints from 2018-12-31 before CV start 2019-12-31.
+-Preprints after CV start 2019-12-31 untill today 2020-08-18.
+
+```{r,eval=FALSE}
+  preprints_all %>%
+  filter(posted_date <= "2019-12-31") %>%
+  write_csv("data/preprints_basic_beforeCV_20181231_20191231.csv")
+preprints_all %>%
+  filter(posted_date >= "2019-12-31") %>%
+  write_csv("data/preprints_basic_afterCV_20191231_20200818.csv")
+
+```
+
+We can read and merge these data together. 
+```{r}
+preprints_bf<- read.csv("/Users/dermit01/Downloads/blog-master-1/data/preprints/preprints_basic_beforeCV_20181231_20191231.csv")
+preprints_af<- read.csv("/Users/dermit01/Downloads/blog-master-1/data/preprints/preprints_basic_afterCV_20191231_20200818.csv")
+preprints_all<-rbind(preprints_bf,preprints_af)
+```
+
+### Plotting the data  
+Let's first inspect the number of cancer-related and covid-related preprints in the time span between 31^st^ December 2018 up to 18^th^ August 2020.
+```{r, eval= FALSE}
+preprints_all %>% group_by(covid_preprint,posted_date) %>% 
+  count() %>% mutate_if(is.character,as.factor) %>% filter(covid_preprint!="other") %>%
+   mutate(posted_date = lubridate::ymd(posted_date)) %>% 
+    ggplot(aes(x = posted_date, y = n, color = covid_preprint))+
+    geom_col(aes(fill = covid_preprint)) +
+  scale_x_date(date_labels="%b %y",date_breaks  ="1 month")+
+    labs(x = "Posted date (by months)", y = "Preprints deposited") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+![Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_1-1.png)
+
+Wow! the number of COVID-19 preprints increased tremendously along with the expansion of COVID-19 pandemic. 
+
+Do the cancer-related preprints decreased when the pandemic expanded thought?
+```{r, eval=FALSE}
+preprints_all %>%
+    mutate(posted_date = lubridate::ymd(posted_date)) %>%   mutate(posted_month = floor_date(posted_date, unit = "month"))  %>%  group_by(covid_preprint,posted_month) %>% count() %>% mutate_if(is.character,as.factor) %>% filter(covid_preprint=="cancer") %>% 
+   ggplot(aes(x = posted_month, y = n, color = covid_preprint))+
+    geom_col(aes(fill = covid_preprint))+
+  labs(x = "Posted date (by months)", y = "Preprints deposited")+  theme(axis.text.x = element_text(angle = 90))
+```
+
+![Cancer Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_2-1.png)
+
+Despite many of the labs being closed (including mine), the number of cancer-related preprints did not decreased during the pandemic. I wonder if any category within biology research was more affected than others `r emo::ji("thinking")`.
+
+There have been a `preprint surge` during the pandemic and as a consequence  preprint servers have enhanced their usual screening procedures, adopting some restrictive publication norms like putting a [bar on manuscripts that are based on computational models.]( https://www.nature.com/articles/d41586-020-01394-6)
+
+I wonder how many of the preprints were later published in peer-review journals after WHO declared the outbreak of COVID-19 pandemic on the 11 of March 2020.
+```{r, eval=FALSE}
+preprints_all %>%
+    mutate(posted_date = lubridate::ymd(posted_date)) %>% 
+    filter(posted_date >= "2020-03-11") %>% 
+    group_by(covid_preprint,is_published) %>% 
+    summarise(n = n()) %>%
+    mutate(freq = n / sum(n)) %>% 
+    filter(covid_preprint!="other") %>% 
+filter(is_published!="FALSE") %>% 
+  ggplot(aes(x = covid_preprint, y = freq, fill = is_published))+
+  geom_col(aes(fill = covid_preprint)) +
+  scale_y_continuous(labels = scales::percent_format())+
+    labs(x = "", y = "% of preprints published")
+```
+![Published Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_3-1.png)
+Almost double the number of covid pre-prints were published in peer-review journals upon preprint publication. This could have to do with the urgency of disseminating scientific knowledge of SAR-CoV2 virus pandemic and the little things known about SAR-CoV2 virus. I wonder if the rate of publication in peer-review journals was affected after biomedical repositories would no longer accept manuscripts making predictions about treatments for COVID-19 solely on the basis of computational work, but I do not know the exact date when that was implemented. 
+
+---
+
+## Additional explorations on these data. 
+
+There are some additional exploration one could do with these data:
+
+- <b>Percentage of downloads:</b> One could use the function `getUsageData` to get preprints metrics. Did scientist stopped downloading cancer-related preprints in favor of COVID-19 preprints or the number of cancer-related preprints downloads remained stable/grew during the pandemic? 
+
+- <b>Comments per preprint:</b> In the [Fraser preprint](https://www.biorxiv.org/content/10.1101/2020.05.22.111294v1.full.pdf) authors found that non-COVID-19 preprints were rarely commented upon, in comparison to COVID-19 preprints (Fig 5D). I wonder if as a consequence of working from home the engagement level of cancer-related preprints increased upon the outbreak of COVID-19 a pandemic on the 11 March 2020 (this could be because scientist that work in this research field would have more office time to read and comment on these preprints).
