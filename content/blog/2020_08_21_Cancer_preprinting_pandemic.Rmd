@@ -177,20 +177,24 @@ preprints_all<-rbind(preprints_bf,preprints_af)
 ### Plotting the data  
 Let's first inspect the number of cancer-related and covid-related preprints in the time span between 31^st^ December 2018 up to 18^th^ August 2020.
 ```{r, eval= FALSE}
-preprints_all %>% group_by(covid_preprint,posted_date) %>% 
-  count() %>% mutate_if(is.character,as.factor) %>% filter(covid_preprint!="other") %>%
-   mutate(posted_date = lubridate::ymd(posted_date)) %>% 
-    ggplot(aes(x = posted_date, y = n, color = covid_preprint))+
-    geom_col(aes(fill = covid_preprint)) +
-  scale_x_date(date_labels="%b %y",date_breaks  ="1 month")+
-    labs(x = "Posted date (by months)", y = "Preprints deposited") +
-  theme(axis.text.x = element_text(angle = 90))
+preprints_all %>%
+    mutate(posted_date = lubridate::ymd(posted_date)) %>%   
+  mutate(posted_month = floor_date(posted_date, unit = "month"))  %>%  group_by(covid_preprint,posted_month) %>% count() %>% mutate_if(is.character,as.factor)%>% 
+    ggplot(aes(x = posted_month, y = n, fill = covid_preprint))+
+    geom_col(alpha=0.8)+
+    labs(x = "Posted date (by months)", y = "Preprints deposited")+  theme(axis.text.x = element_text(angle = 90))
+
 ```
-![Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_1-1.png)
+![](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_1-1.png)
 
-Wow! the number of COVID-19 preprints increased tremendously along with the expansion of COVID-19 pandemic. 
 
-Do the cancer-related preprints decreased when the pandemic expanded thought?
+Wow! the number of COVID-19 preprints increased tremendously along with the expansion of COVID-19 pandemic, reaching up to 2,000 preprints deposited in May (see [`preprint surge`](https://www.nature.com/articles/d41586-020-01394-6)).
+Early in May, preprint servers enhanced their usual screening procedures for publishing scientific articles related to COVID-19, adopting some restrictive publication norms like putting a bar on manuscripts that are solely based on computational models, and this could be one of the causes behind that drop in COVID-19 preprints after May.
+
+Nevertheless, the majority of preprints were neither cancer-related nor COVID-19-related preprints.
+
+The number of cancer-related preprints did not decrease when the pandemic expanded, and if anything there is a trend for more cancer-related preprints during 2019 and 2020. Despite many of the labs (including mine) being closed on the second trimester of 2020, the number of cancer-related preprints did not decreased during early days of the pandemic. Researchers could have had more time to put together results for preprint publication. I wonder though, if any category within biology research was more affected than others `r emo::ji("thinking")`.
+
 ```{r, eval=FALSE}
 preprints_all %>%
     mutate(posted_date = lubridate::ymd(posted_date)) %>%   mutate(posted_month = floor_date(posted_date, unit = "month"))  %>%  group_by(covid_preprint,posted_month) %>% count() %>% mutate_if(is.character,as.factor) %>% filter(covid_preprint=="cancer") %>% 
@@ -199,13 +203,9 @@ preprints_all %>%
   labs(x = "Posted date (by months)", y = "Preprints deposited")+  theme(axis.text.x = element_text(angle = 90))
 ```
 
-![Cancer Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_2-1.png)
+![](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_2-1.png)
 
-Despite many of the labs being closed (including mine), the number of cancer-related preprints did not decreased during the pandemic. I wonder if any category within biology research was more affected than others `r emo::ji("thinking")`.
-
-There have been a `preprint surge` during the pandemic and as a consequence  preprint servers have enhanced their usual screening procedures, adopting some restrictive publication norms like putting a [bar on manuscripts that are based on computational models.]( https://www.nature.com/articles/d41586-020-01394-6)
-
-I wonder how many of the preprints were later published in peer-review journals after WHO declared the outbreak of COVID-19 pandemic on the 11 of March 2020.
+How many of the preprints were later published in peer-review journals after WHO declared the outbreak of COVID-19 pandemic on the 11 of March 2020?
 ```{r, eval=FALSE}
 preprints_all %>%
     mutate(posted_date = lubridate::ymd(posted_date)) %>% 
@@ -213,15 +213,15 @@ preprints_all %>%
     group_by(covid_preprint,is_published) %>% 
     summarise(n = n()) %>%
     mutate(freq = n / sum(n)) %>% 
-    filter(covid_preprint!="other") %>% 
 filter(is_published!="FALSE") %>% 
   ggplot(aes(x = covid_preprint, y = freq, fill = is_published))+
   geom_col(aes(fill = covid_preprint)) +
   scale_y_continuous(labels = scales::percent_format())+
     labs(x = "", y = "% of preprints published")
+
 ```
-![Published Preprints](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_3-1.png)
-Almost double the number of covid pre-prints were published in peer-review journals upon preprint publication. This could have to do with the urgency of disseminating scientific knowledge of SAR-CoV2 virus pandemic and the little things known about SAR-CoV2 virus. I wonder if the rate of publication in peer-review journals was affected after biomedical repositories would no longer accept manuscripts making predictions about treatments for COVID-19 solely on the basis of computational work, but I do not know the exact date when that was implemented. 
+![](https://raw.githubusercontent.com/demar01/blog/master/blogdown/blog/2020_08_21_Cancer_preprinting_pandemic_files/figure-html/cancer_preprint_3-1.png)
+Almost double the number of COVID-19 preprints were published in peer-review journals upon preprint publication. This could have to do with the urgency of disseminating scientific knowledge of SAR-CoV2 virus pandemic and the little things known about SAR-CoV2 virus. 
 
 ---
 
@@ -231,4 +231,5 @@ There are some additional exploration one could do with these data:
 
 - <b>Percentage of downloads:</b> One could use the function `getUsageData` to get preprints metrics. Did scientist stopped downloading cancer-related preprints in favor of COVID-19 preprints or the number of cancer-related preprints downloads remained stable/grew during the pandemic? 
 
-- <b>Comments per preprint:</b> In the [Fraser preprint](https://www.biorxiv.org/content/10.1101/2020.05.22.111294v1.full.pdf) authors found that non-COVID-19 preprints were rarely commented upon, in comparison to COVID-19 preprints (Fig 5D). I wonder if as a consequence of working from home the engagement level of cancer-related preprints increased upon the outbreak of COVID-19 a pandemic on the 11 March 2020 (this could be because scientist that work in this research field would have more office time to read and comment on these preprints).
+- <b>Comments per preprint:</b> [Disqus](https://disqus.com) is a comment platform that allows readers to post text comments and is featured in BioRxiv and medRxiv html pages. In the [Fraser preprint](https://www.biorxiv.org/content/10.1101/2020.05.22.111294v1.full.pdf) authors found that non-COVID-19 preprints were rarely commented upon, in comparison to COVID-19 preprints (Fig 5D). One could explore if the engagement level of cancer-related preprints increased upon the outbreak of COVID-19  pandemic (if so, this could be because scientists that work in this research field would had have more office time to read and comment on these preprints).
+
