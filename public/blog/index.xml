@@ -21,6 +21,16 @@
     </item>
     
     <item>
+      <title>Image Classification with CNN</title>
+      <link>/blog/image-classification-with-cnn/</link>
+      <pubDate>Fri, 21 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/image-classification-with-cnn/</guid>
+      <description>Image Classification With Convolutional Neural Networks In this article I will explore how to build a CNN using keras and classify images. My aim is to learn the basic of CNN, learn how use the tools to build them and use these tools to analyse digital pathology images.
+One popular way to do image classification is buy building Convolutional Neural Networks (CNN) using keras. CNN is a class of deep learning neural networks that uses a number of filters to extract features from images.</description>
+    </item>
+    
+    <item>
       <title>Sentiment analysis of Genius songs lyrics</title>
       <link>/blog/sentiment-analysis-of-genius-songs-lyrics/</link>
       <pubDate>Fri, 14 Aug 2020 00:00:00 +0000</pubDate>
