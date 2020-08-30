@@ -1,0 +1,496 @@
+---
+title: "Image Classification with CNN"
+author: "Maria Dermit"
+date: 2020-08-21
+categories: ["Image Classification","Neural Networks","Deep leaning","Keras"]
+
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="image-classification-with-convolutional-neural-networks" class="section level1">
+<h1>Image Classification With Convolutional Neural Networks</h1>
+<p>In this article I will explore how to build a CNN using keras and classify images. My aim is to learn the basic of CNN, learn how use the tools to build them and use these tools to analyse digital pathology images.</p>
+<p>One popular way to do image classification is buy building Convolutional Neural Networks (CNN) using keras. CNN is a class of deep learning neural networks that uses a number of filters to extract features from images. In particular, CNN applies a series of convoluting (applying filter to modify the image) and pooling steps. In CNNs, sliding filters analyze pixels in groups with their neighbors and each filter can be dedicated to detecting a specific pattern in the image- so if the image is a face, there will be filters dedicated to detecting eyes, mouth or nose.</p>
+<p>Filters start with random values and change along with the training process. So in the training these filters are getting trained to identifying unique features for each image type. In this process feature maps are generated and each filter triggers an activation function that determines whether a feature is present at each scanning position. This process goes throughout the layers of the CNN.</p>
+<div class="figure">
+<img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/CNN_sheme.png" alt="" />
+<p class="caption">CNN</p>
+</div>
+<p>The state of the art in deep learning is provided by <strong>Keras</strong> and <strong>TensorFlow</strong> (if you are interested in learning more about some of their key features you can <a href="https://tensorflow.rstudio.com/">visit</a>. In addition to image classification, Keras canbe used for <a href="https://blogs.rstudio.com/ai/posts/2017-12-07-text-classification-with-keras/">text-classification</a> too.</p>
+<p>In this example of image classification I am going to use a model to classify a small number (7) of images from:</p>
+<ul>
+<li>Standard Bikes.</li>
+<li>Electric Bikes.</li>
+<li>Scooters.</li>
+</ul>
+<p>I decided to use these type of images because my human eye would have a pretty hard time telling apart Standard Bikes from Electric Bikes. The main different feature between these types of bikes is that Electric Bikes have a big bock on the frame or at the bike fork.
+I got jpg images from Google and the file size is different for all of them. Also, some of them have different backgrounds, so it is going to be interesting how the model handles that.</p>
+<pre class="r"><code>library(tidyverse)
+library(here)
+library(EBImage) #to read images 
+library(keras) #to build the CNN model 
+library(kableExtra) #to display tables</code></pre>
+<div id="getting-the-data" class="section level3">
+<h3>Getting the data</h3>
+<p>I can import the downloaded images using the function <code>readImage</code> from the EBImage package.</p>
+<pre class="r"><code>pics &lt;- c(here(&quot;static&quot;,&quot;driving&quot;,&quot;b1.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;b2.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;b3.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;b4.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;b5.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;b6.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;b7.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;eb1.jpg&quot;),here(&quot;static&quot;,&quot;driving&quot;,&quot;eb2.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;eb3.jpg&quot;),here(&quot;static&quot;,&quot;driving&quot;,&quot;eb4.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;eb5.jpg&quot;),here(&quot;static&quot;,&quot;driving&quot;,&quot;eb6.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;eb7.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;s1.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;s2.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;s3.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;s4.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;s5.jpg&quot;), here(&quot;static&quot;,&quot;driving&quot;,&quot;s6.jpg&quot;),
+          here(&quot;static&quot;,&quot;driving&quot;,&quot;s7.jpg&quot;))
+mypic &lt;- list()
+for (i in 1:length(pics)) {mypic[[i]] &lt;- readImage(pics[i])}</code></pre>
+</div>
+<div id="exploring-the-data" class="section level3">
+<h3>Exploring the data</h3>
+<pre class="r"><code>print(mypic[[1]])</code></pre>
+<pre><code>## Image 
+##   colorMode    : Color 
+##   storage.mode : double 
+##   dim          : 1000 725 3 
+##   frames.total : 3 
+##   frames.render: 1 
+## 
+## imageData(object)[1:5,1:6,1]
+##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]    1    1    1    1    1    1
+## [2,]    1    1    1    1    1    1
+## [3,]    1    1    1    1    1    1
+## [4,]    1    1    1    1    1    1
+## [5,]    1    1    1    1    1    1</code></pre>
+<pre class="r"><code>display(mypic[[8]])</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-3-1.png" width="800" /></p>
+<pre class="r"><code>summary(mypic[[1]])</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.0000  0.7412  1.0000  0.8169  1.0000  1.0000</code></pre>
+<pre class="r"><code>hist(mypic[[2]])</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-3-2.png" width="800" /></p>
+<pre class="r"><code>str(mypic)</code></pre>
+<pre><code>## List of 21
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1000, 1:725, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1170, 1:764, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:880, 1:530, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1000, 1:660, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:500, 1:333, 1:3] 0.173 0.176 0.176 0.169 0.173 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:2000, 1:1284, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:286, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:640, 1:426, 1:3] 0.4 0.447 0.467 0.455 0.471 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:4740, 1:2916, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1500, 1:1272, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:800, 1:458, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1200, 1:900, 1:3] 0.322 0.306 0.325 0.349 0.353 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1620, 1:1080, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1000, 1:667, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:2000, 1:2000, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:306, 1:512, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:670, 1:544, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:800, 1:800, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:1000, 1:1000, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:843, 1:640, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:900, 1:900, 1:3] 0.969 0.969 0.969 0.969 0.969 ...
+##   .. ..@ colormode: int 2</code></pre>
+</div>
+<div id="splitting-for-traintesting" class="section level3">
+<h3>Splitting for train/testing</h3>
+<p>This will ensure that our data has a split between 70/30 and 80/20 training/testing which is standard for training CNN model. So from the 7 set of each image class we take 5 images for training and 2 images for testing.</p>
+<pre class="r"><code>trainX &lt;- list(1:16)
+
+for(x in 1:5){
+  trainX[[x]] &lt;- mypic[[x]] #bikes
+  trainX[[x+5]] &lt;- mypic[[x+7]] #ebikes
+  trainX[[x+10]] &lt;-mypic[[x+14]] #scooters
+}
+
+testX &lt;- list(1:6)
+
+#select last two images in each group
+for(x in 1:2){
+  testX[[x]] &lt;- mypic[[x+5]] #bikes
+  testX[[x+2]] &lt;- mypic[[x+12]] #ebikes
+  testX[[x+4]] &lt;- mypic[[x+19]] #scooters
+}</code></pre>
+</div>
+<div id="preparing-the-data" class="section level3">
+<h3>Preparing the data</h3>
+<p>To prepare the data for training and testing we want to keep all image dimensions constant; as I sayed I downloaded images from Google and they came in different sizes. We need to resize the images so that all are 176 by 176 pixels using <code>resize</code> function from the EBImage Library. I chose 176 by 176 because it was smaller than the smallest height across all the the dataset. Images must also have equal width and height (square dimensions) because we want to end up with square matrices.</p>
+<pre class="r"><code>#Resizing Images (Train)
+for(x in 1:length(trainX)){
+  trainX[[x]] &lt;- resize(trainX[[x]], 176, 176)
+}
+
+#Resizing Images (test)
+for(x in 1:length(testX)){
+  testX[[x]] &lt;- resize(testX[[x]], 176, 176)
+}</code></pre>
+<pre class="r"><code>#Display new dimensions
+#str(trainX)
+str(testX)</code></pre>
+<pre><code>## List of 6
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   .. ..@ colormode: int 2
+##  $ :Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   .. ..@ .Data    : num [1:176, 1:176, 1:3] 0.969 0.969 0.969 0.969 0.969 ...
+##   .. ..@ colormode: int 2</code></pre>
+</div>
+<div id="combining-the-data-together-and" class="section level3">
+<h3>Combining the data together and</h3>
+<p>We can use <code>combine</code> to merge all separated images into an image sequence and display them using <code>display</code>, both functions from EBImage.</p>
+<pre class="r"><code>trainX &lt;- combine(trainX)
+dis &lt;- tile(trainX, 5)
+display(dis, title = &quot;Eco mobility&quot;)</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-7-1.png" width="800" />
+We can see that most pictures have a white background, but some of them have a background with a park or a wall.</p>
+<pre class="r"><code>testX &lt;- combine(testX)
+dis2 &lt;- tile(testX, 2)
+display(dis2, title = &quot;Eco mobility&quot;)</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-8-1.png" width="800" /></p>
+<pre class="r"><code>str(testX)</code></pre>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:176, 1:176, 1:3, 1:6] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..@ colormode: int 2</code></pre>
+<p>We need to reorder the dimensions (number of images, width, height, color), and we can use the <code>aperm</code> to do this permutation.</p>
+<pre class="r"><code>testX &lt;- aperm(testX, c(4,1,2,3))
+trainX &lt;- aperm(trainX, c(4, 1, 2, 3))
+
+str(testX)</code></pre>
+<pre><code>##  num [1:6, 1:176, 1:176, 1:3] 1 1 1 1 1 ...</code></pre>
+</div>
+<div id="creating-labels" class="section level3">
+<h3>Creating labels</h3>
+<p>We are going to give labels to each category, so:
+- Standard Bikes get 0
+- Electric Bikes get 1
+- Scooters get 2</p>
+<pre class="r"><code>trainY &lt;- c(rep(0, 5), rep(1, 5), rep(2,5))
+testY &lt;- c(0,0,1,1,2,2)</code></pre>
+</div>
+<div id="one-hot-encoding" class="section level3">
+<h3>One Hot Encoding</h3>
+<p>We now have the data splitted, resized andwe have created labels. The next step we need to do is One Hot Encoding, which basically transform the vector that contains the values for each class to a <strong>matrix</strong> with a boolean value for each class.</p>
+<p>We can use the <code>to_categorical</code> function to do this.</p>
+<pre class="r"><code>#One Hot Encoding
+trainLabels &lt;- to_categorical(trainY)
+testLabels &lt;- to_categorical(testY)
+
+#Display matrix
+kable(testLabels) %&gt;%
+  kable_styling() %&gt;%
+  scroll_box(width = &quot;100%&quot;, height = &quot;200px&quot;)</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<tbody>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="building-the-model" class="section level3">
+<h3>Building the model</h3>
+<p>Building the neural network requires configuring the layers of the model and then compiling the model. Layers are the building block of a neural network, and they extract representations from the data fed into them. To create a sequential model we can use the <code>keras_model_sequential</code> function and then add series of layer functions. Adding <code>layers</code> reminds me of adding <code>steps</code> in tidymodels.</p>
+<p>Our model has to differentiate if an image is a bike, an ebike or a scooter, and this is reflected by binary 1 and 0 values. A type of network that performs well on such a problem is a <strong>multi-layer perceptron</strong>. This type of neural network has classifiers that are fully connected.There other type of layers, including convolution layers and pooling layes.
+As for activation function, a standard type is Rectified Linear Unit (RELU). Another activation function is softmax, which is used in the output layer, so that the output values are between 0 and 1, which make it easy to work with predicted probabilities.</p>
+<p>Once the model gets build, we need to compile it, and to do so we can call <code>categorical_crossentropy</code> loss function and use a particular optimiser algorithm, like Stochastic Gradient Descent (sgd). Finally, to monitor the model accuracy during we can use metrics <code>accuracy</code>.</p>
+<pre class="r"><code>model &lt;- keras_model_sequential()
+model %&gt;%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = &#39;relu&#39;,   input_shape = c(176, 176, 3)) %&gt;%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3) , activation = &#39;relu&#39;) %&gt;%
+  layer_max_pooling_2d(pool_size = c(2,2)) %&gt;%
+  layer_dropout(rate = 0.25) %&gt;%
+  layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = &#39;relu&#39;)%&gt;%
+  layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = &#39;relu&#39;) %&gt;%
+  layer_max_pooling_2d(pool_size = c(2,2)) %&gt;%
+  layer_dropout(rate = 0.25) %&gt;%
+  layer_flatten() %&gt;% #this allows to pass to next layer, which is always dense
+  layer_dense(units = 256, activation = &#39;relu&#39;) %&gt;%
+  layer_dropout(rate = 0.25) %&gt;%
+  layer_dense(units = 3, activation = &quot;softmax&quot;) %&gt;%
+  compile(loss = &quot;categorical_crossentropy&quot;, 
+          optimizer = 
+            optimizer_sgd(lr = 0.001, momentum = 0.9, decay = 1e-6, nesterov = T),
+          metrics = c(&#39;accuracy&#39;))
+  
+#View the model
+summary(model)</code></pre>
+<pre><code>## Model: &quot;sequential&quot;
+## ________________________________________________________________________________
+## Layer (type)                        Output Shape                    Param #     
+## ================================================================================
+## conv2d (Conv2D)                     (None, 174, 174, 32)            896         
+## ________________________________________________________________________________
+## conv2d_1 (Conv2D)                   (None, 172, 172, 32)            9248        
+## ________________________________________________________________________________
+## max_pooling2d (MaxPooling2D)        (None, 86, 86, 32)              0           
+## ________________________________________________________________________________
+## dropout (Dropout)                   (None, 86, 86, 32)              0           
+## ________________________________________________________________________________
+## conv2d_2 (Conv2D)                   (None, 84, 84, 64)              18496       
+## ________________________________________________________________________________
+## conv2d_3 (Conv2D)                   (None, 82, 82, 64)              36928       
+## ________________________________________________________________________________
+## max_pooling2d_1 (MaxPooling2D)      (None, 41, 41, 64)              0           
+## ________________________________________________________________________________
+## dropout_1 (Dropout)                 (None, 41, 41, 64)              0           
+## ________________________________________________________________________________
+## flatten (Flatten)                   (None, 107584)                  0           
+## ________________________________________________________________________________
+## dense (Dense)                       (None, 256)                     27541760    
+## ________________________________________________________________________________
+## dropout_2 (Dropout)                 (None, 256)                     0           
+## ________________________________________________________________________________
+## dense_1 (Dense)                     (None, 3)                       771         
+## ================================================================================
+## Total params: 27,608,099
+## Trainable params: 27,608,099
+## Non-trainable params: 0
+## ________________________________________________________________________________</code></pre>
+</div>
+<div id="fitting-the-model" class="section level3">
+<h3>Fitting the model</h3>
+<p>Now that we have built the architecture of the model and the image data is processed, we are ready to integrate the two. To do this we use the <code>fit</code> function from keras with the training data and traning labels. Some hyperparameters that are defined are:</p>
+<pre class="r"><code>history &lt;- model %&gt;%
+  fit(trainX, trainLabels, 
+      epochs = 60, #times the training set gets passed through the CNN for optimization
+      batch_size = 32,#samples propagated through the CNN at one time 
+      validation_split = 0.2 #percent of training data used for validation
+      )
+
+#Visualising the fitting/ epochs
+plot(history)</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-14-1.png" width="800" /></p>
+<ul>
+<li><strong>loss and acc</strong> indicate the loss and accuracy of the model for the training data.</li>
+<li><strong>val_loss</strong> and val_acc aindicate the loss and accuracy of the model for the for the test or validation data.</li>
+</ul>
+<p>We can see that with each iteration the loss decreasing and the accuracy increasing. But are we overfitting? Has the model over-learnt the training dataset?</p>
+<p>There may be some sings of overfitting if the training data accuracy keeps improving while the validation data accuracy gets worse (model starts to just memorize the data instead of learning from it). A solution when this happens can be doing data augmentation.
+On the other hand, if the trend for accuracy on both datasets is still rising for the last few epochs, this may be a sign that the model has not yet over-learned the training dataset.</p>
+<p>We have now trained the model, compiled it and fitted to data so we can adjust hyperparameters and other factors to optimize the accuracy.</p>
+</div>
+<div id="evaluating-the-model" class="section level3">
+<h3>Evaluating the model</h3>
+<ul>
+<li>On the train data.</li>
+</ul>
+<pre class="r"><code>evTrain &lt;- model %&gt;%
+  evaluate(trainX, trainLabels)
+evTrain</code></pre>
+<pre><code>##      loss  accuracy 
+## 0.2641464 1.0000000</code></pre>
+<p>This model had a 100% accuracy for predicting the training set with loss of 16.86%.</p>
+<p>We can call <code>predict_classes</code> to use the model to make a prediction of the training set and create a confusion matrix.</p>
+<pre class="r"><code>pred &lt;- model %&gt;%
+  predict_classes(trainX)
+
+#Create the confusion matrix
+table(Predicted = pred, Actual = trainY)</code></pre>
+<pre><code>##          Actual
+## Predicted 0 1 2
+##         0 5 0 0
+##         1 0 5 0
+##         2 0 0 5</code></pre>
+<p>The confusion matrix shows that the model we created makes the right predictions.</p>
+<p>We can look at the probabilities for each categories.</p>
+<pre class="r"><code>prob &lt;- model %&gt;%
+  predict_proba(trainX)
+
+cbind(prob, Predicted_class = pred, Actual = trainY)</code></pre>
+<pre><code>##                                        Predicted_class Actual
+##  [1,] 0.95703465 0.03201567 0.01094964               0      0
+##  [2,] 0.86703885 0.06097450 0.07198658               0      0
+##  [3,] 0.93079931 0.04088598 0.02831475               0      0
+##  [4,] 0.96321779 0.02021343 0.01656874               0      0
+##  [5,] 0.81137061 0.14501296 0.04361647               0      0
+##  [6,] 0.16804671 0.78936154 0.04259172               1      1
+##  [7,] 0.19521724 0.76894486 0.03583783               1      1
+##  [8,] 0.25084555 0.59466624 0.15448825               1      1
+##  [9,] 0.11676817 0.86339182 0.01983995               1      1
+## [10,] 0.22755799 0.68718290 0.08525907               1      1
+## [11,] 0.08194190 0.03500600 0.88305211               2      2
+## [12,] 0.03219539 0.01162616 0.95617843               2      2
+## [13,] 0.42813191 0.08656579 0.48530233               2      2
+## [14,] 0.33236235 0.06212686 0.60551077               2      2
+## [15,] 0.33998162 0.06697037 0.59304798               2      2</code></pre>
+<p>It looks like the model does not have issues predicting images with bicycles correctly.This looks quite surprising, since the standard bikes and ebikes look so similar to me!</p>
+<ul>
+<li>On the test data.</li>
+</ul>
+<p>We can repeat the above steps for test data.</p>
+<pre class="r"><code>evTest &lt;- model %&gt;%
+  evaluate(testX, testLabels)
+evTest</code></pre>
+<pre><code>##      loss  accuracy 
+## 0.5950766 0.6666667</code></pre>
+<p>We can see than in the accuracy on the test data drops. This could be due to the fact that 5 images per group for test and train data set is way too small of a sample and also there was variations in images and backgrounds. Plus, accuracies fluctuate every time the model runs.</p>
+<pre class="r"><code>predTest &lt;- model %&gt;%
+  predict_classes(testX)
+
+#Create the confusion matrix
+table(Predicted = predTest, Actual = testY)</code></pre>
+<pre><code>##          Actual
+## Predicted 0 1 2
+##         0 2 2 0
+##         2 0 0 2</code></pre>
+<p>In fact we can see that the model has some issues to distinguish standard bikes and ebikes when seeing new data. No issues to tell scooters apart.</p>
+<pre class="r"><code>probTest &lt;- model %&gt;%
+  predict_proba(testX)
+cbind(probTest, Predicted_class = predTest, Actual = testY)</code></pre>
+<pre><code>##                                      Predicted_class Actual
+## [1,] 0.9484544 0.03665487 0.01489069               0      0
+## [2,] 0.9180664 0.05786508 0.02406845               0      0
+## [3,] 0.4268365 0.34671259 0.22645089               0      1
+## [4,] 0.5001020 0.21784234 0.28205565               0      1
+## [5,] 0.1583756 0.03504702 0.80657738               2      2
+## [6,] 0.3862076 0.08324913 0.53054321               2      2</code></pre>
+<pre class="r"><code>ggplot() +
+  geom_col(aes(x = c(&quot;Training&quot;, &quot;Testing&quot;), y = c(evTrain[2], evTest[2])), fill = c(&quot;green&quot;, &quot;darkgreen&quot;)) +
+  geom_text(aes(x = c(&quot;Training&quot;, &quot;Testing&quot;), y = c(evTrain[2] + 0.1 , evTest[2] + 0.1), label = c(round(evTrain[2], 2), round(evTest[2], 2)))) +
+  labs(y = &quot;Accuracy&quot;, x =&quot;Data&quot;, title = &quot;Accuracy of Train &amp; Test Data &quot;) +
+   theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;top&quot;)</code></pre>
+<p><img src="/blog/2020_08_25_Image_Classification_CNN_files/figure-html/unnamed-chunk-21-1.png" width="800" /></p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<ul>
+<li>Keras provides an interphase to build and optimise CNN models</li>
+<li>This model had very little number of images the our training and testing set. Adding more data to the model will push accuracy higher. This would also require a GPU (if not it might just take forever to run). One could leverage cloud computing with <code>clouldml</code> to train on GPUs.</li>
+<li>Increasing the number of layers may help on decreasing loss.</li>
+</ul>
+<hr />
+</div>
+<div id="further-reading-on-cnn-digital-pathology." class="section level2">
+<h2>Further reading on CNN &amp; Digital Pathology.</h2>
+<ol style="list-style-type: decimal">
+<li><p>XU, Y. et al 2017 <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1685-x">BMC Bioinformatics</a></p></li>
+<li><p>Kalra et al 2020 <a href="https://www.nature.com/articles/s41746-020-0238-2">Nature digital medicine</a></p></li>
+<li><p><a href="https://www.youtube.com/watch?time_continue=2393&amp;v=K_tzS5_mj9c&amp;feature=emb_logo">The Future of Digital Pathology at Barts Health</a></p></li>
+</ol>
+</div>
+</div>
