@@ -30,6 +30,16 @@
     </item>
     
     <item>
+      <title>ML predictions on Breast Cancer</title>
+      <link>/blog/ml-predictions-on-breast-cancer/</link>
+      <pubDate>Wed, 02 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/ml-predictions-on-breast-cancer/</guid>
+      <description>Walkabout of ML using Caret This post is going to describe a step-by-step ML analysis using Caret to build a classification model based on logistic regression. Logistic regression is a supervised learning method that predicts class membership and it is characterised for the S-shaped curve of the logistic function. For further reading on logistic regression see.
+The dataset I am going to work with has features on breast cancer digitized images of nuclei collected with fine needle aspirate (FNA) from a breast mass.</description>
+    </item>
+    
+    <item>
       <title>Cancer-related preprints during the COVID-19 pandemic</title>
       <link>/blog/cancer-related-preprints-during-the-covid-19-pandemic/</link>
       <pubDate>Fri, 21 Aug 2020 00:00:00 +0000</pubDate>
