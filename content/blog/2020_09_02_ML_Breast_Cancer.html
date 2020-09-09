@@ -1,0 +1,213 @@
+---
+title: "ML predictions on Breast Cancer"
+author: "Maria Dermit"
+date: 2020-09-02
+output: html_document
+---
+
+
+
+<div id="walkabout-of-ml-using-caret" class="section level1">
+<h1>Walkabout of ML using Caret</h1>
+<p>This post is going to describe a step-by-step ML analysis using Caret to build a classification model based on logistic regression. Logistic regression is a <em>supervised</em> learning method that predicts class membership and it is characterised for the S-shaped curve of the logistic function. For further reading on logistic regression <a href="https://livebook.manning.com/book/machine-learning-for-mortals-mere-and-otherwise/chapter-4/18">see</a>.</p>
+<p>The dataset I am going to work with has features on breast cancer digitized images of nuclei collected with fine needle aspirate (FNA) from a breast mass. This data is a <a href="https://www.kaggle.com/uciml/breast-cancer-wisconsin-data">Kaggle</a> competition to predict whether the cancer is benign or malignant.
+For each cell nucleus ten features are computed and for each feature there is information on mean, standard error and the "worst’/largest (mean of the three
+largest values) of each features. So in total there are 30 features.
+And there is information about two attributes: diagnosis (benign or malignant) and patient ID number.</p>
+<pre class="r"><code>library(tidyverse)
+library(RCurl) #to read data
+library(caret) #to do ML
+library(caretEnsemble) #to make ensembles of caret models
+library(GGally) #to get high-level visualizations
+library(DMwR) # to balance the unbalanced class
+library(FSelector) #to remove unnecessary features</code></pre>
+<p>Basically a ML workflow follows these steps:
+<img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/ML_process.png" alt="ML" /></p>
+<div class="figure">
+<img src="https://raw.githubusercontent.com/demar01/blog/master/static/img/stream_ML.png" alt="" />
+<p class="caption">ML</p>
+</div>
+<p>So lets follow those steps to build a classifier model that predicts breast cancer diagnosis!</p>
+<div id="data-acquisition" class="section level3">
+<h3>Data acquisition</h3>
+<pre class="r"><code>x &lt;- getURL(&quot;https://raw.githubusercontent.com/demar01/blog/master/static/blog/%202020-09-02/data-1.csv&quot;)
+breast.cancer.raw&lt;- read.csv(text = x)</code></pre>
+</div>
+<div id="data-cleaning" class="section level3">
+<h3>Data cleaning</h3>
+<pre class="r"><code>breast.cancer.raw&lt;-breast.cancer.raw[,-33]
+cat(&quot;The dimension of data set is (&quot;, dim(breast.cancer.raw), &quot;)&quot;)</code></pre>
+<pre><code>## The dimension of data set is ( 569 32 )</code></pre>
+<pre class="r"><code>bcancer &lt;- breast.cancer.raw %&gt;% 
+  dplyr::select(-id)
+
+bcancer$diagnosis &lt;- as.factor(bcancer$diagnosis)
+names(bcancer)[9]&lt;-&quot;concave.points_mean&quot;
+names(bcancer)[19]&lt;-&quot;concave.points_se&quot;
+names(bcancer)[29]&lt;-&quot;concave.points_worst&quot;
+
+bcancer %&gt;% 
+  count(diagnosis)</code></pre>
+<pre><code>##   diagnosis   n
+## 1         B 357
+## 2         M 212</code></pre>
+</div>
+<div id="feature-engineering" class="section level3">
+<h3>Feature Engineering</h3>
+<p>Feature engineering allows to capture the important, interesting features in the dataset with respect to an outcome variable (aka diagnosis).</p>
+<p>There are <a href="http://r-statistics.co/Variable-Selection-and-Importance-With-R.html">multiple ways</a> to assess feature importance.</p>
+<p>We can use the random forest method to find the weights of attributes using <code>random.forest.importance</code> function and <code>cutoff.k</code> to select a subset from a ranked attributes.</p>
+<pre class="r"><code>attribute.scores &lt;- random.forest.importance(diagnosis ~ ., bcancer)
+Top_features&lt;-cutoff.k(attribute.scores, k = 9) # Top 9 features
+
+bcancer&lt;-bcancer%&gt;%
+  dplyr::select(diagnosis,all_of(Top_features))</code></pre>
+<pre class="r"><code>factor_variable_position&lt;-c(1)
+bcancer&lt;-bcancer%&gt;% mutate_at(.,vars(factor_variable_position),~as.factor(.))</code></pre>
+<pre><code>## Note: Using an external vector in selections is ambiguous.
+## ℹ Use `all_of(factor_variable_position)` instead of `factor_variable_position` to silence this message.
+## ℹ See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
+## This message is displayed once per session.</code></pre>
+<p>We can have a look at the data globally:</p>
+<pre class="r"><code>bcancer %&gt;% 
+ggpairs(mapping = aes(color = diagnosis))</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="spliting-the-data" class="section level3">
+<h3>Spliting the data</h3>
+<pre class="r"><code>partition &lt;- createDataPartition(bcancer$diagnosis, p = 0.8, list = FALSE)
+bcancerTrain&lt;- bcancer[partition, ]
+bcancerTest &lt;- bcancer[-partition, ]</code></pre>
+</div>
+<div id="scaling-and-standardising-data" class="section level3">
+<h3>Scaling and standardising data</h3>
+<p>Scaling (divide by standard deviation) and standardising (mean substract) will help to reduce variance between features.</p>
+<pre class="r"><code>preProcess_scale_model &lt;- preProcess(bcancerTrain, method = c(&quot;center&quot;, &quot;scale&quot;))
+bcancerTrain &lt;- predict(preProcess_scale_model, bcancerTrain)
+bcancerTest &lt;- predict(preProcess_scale_model, bcancerTest)</code></pre>
+<p>We can visualise how the features influence diagnosis:</p>
+<pre class="r"><code>featurePlot(x = bcancerTrain[, -1],
+            y = bcancerTrain$diagnosis, 
+            plot = &quot;density&quot;, main= &quot;Density of predictive Features&quot;,
+            strip=strip.custom(par.strip.text=list(cex=1)),
+            scales = list(x = list(relation=&quot;free&quot;), 
+                          y = list(relation=&quot;free&quot;)))</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Features with a high predictive value have very different density curves for the outcome, both in terms of the height (kurtosis) and placement (skewness).</p>
+<p>But, how are these variables correlated between each other? Ideally, not too much so they add additional information.</p>
+<pre class="r"><code>numericVarName &lt;- names(which(sapply(bcancer, is.numeric)))
+corr &lt;- cor(bcancer[,numericVarName], use = &#39;pairwise.complete.obs&#39;)
+ggcorrplot(corr, lab = TRUE, title = &quot;Multicollinearity of predictive features&quot;)</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+We can see that some of the variables - like area, radius and perdimeter- are highly correlated, which makes sense they are values that multiply the radius with a constant. So looking at the multicollinearity plot together with the feature plot for predictor variables we could make a guess of the important features that will be finally included in our predictive model.
+From looking at those one could tell that area_se, texture_worst, concave.points_mean,concave.points_worst, area_worst.</p>
+<p>We could use Recursive Feature Elimination (RFE) to automatically select those important features to be finally included in our predictive model.</p>
+<pre class="r"><code>control &lt;- rfeControl(functions = rfFuncs,
+                      method = &quot;repeatedcv&quot;,
+                      number= 10,
+                      repeats = 5,
+                      verbose = FALSE,
+                      allowParallel = TRUE)
+outcomeName&lt;-&#39;diagnosis&#39;
+predictors&lt;-names(bcancerTrain)[!names(bcancerTrain) %in% outcomeName]
+bcancer_Pred_Profile &lt;- rfe(bcancerTrain[,predictors], bcancerTrain[,outcomeName],
+                         rfeControl = control)
+print(bcancer_Pred_Profile)</code></pre>
+<p>The top 5 variables (out of 9):
+concave.points_worst, concave.points_mean, perimeter_worst, area_worst, radius_worst.</p>
+<pre class="r"><code>#Training data set
+bcancerTrain &lt;- bcancerTrain%&gt;%
+  select(diagnosis,concave.points_worst,
+         texture_worst,
+         area_se,
+         area_worst,
+         concave.points_mean)
+#Test data set
+bcancerTest &lt;- bcancerTest%&gt;%
+  select(diagnosis,concave.points_worst,
+         texture_worst,
+         area_se,
+         area_worst,
+         concave.points_mean)</code></pre>
+</div>
+<div id="dealing-with-class-imbalance" class="section level3">
+<h3>Dealing with class imbalance</h3>
+<p>Synthetic Minority Oversampling Technique (SMOTE) is used to re-balance an unbalanced classification, which is the case for this dataset.</p>
+<pre class="r"><code>bcancerTrain_smothe &lt;- SMOTE(diagnosis~., data.frame(bcancerTrain),
+                      perc.over = 100, perc.under = 200)
+#Data after SMOTHE
+round(prop.table(table(dplyr::select(bcancerTrain_smothe, diagnosis), exclude = NULL)),3)</code></pre>
+<pre><code>## 
+##   B   M 
+## 0.5 0.5</code></pre>
+<p>###Making multiple models and compare them individually</p>
+<p>To train the model we initially have to specify the parameters used to create the model using the function <code>trainControl</code>. An important parameter is the resampling method used to predict the performance of the algorithm. We can use <code>repeatedcv</code>, which is a nested, k-fold repeated crossvalidation.
+Then we can create a list of several train models with function <code>caretList</code> and train each model individually.</p>
+<pre class="r"><code>set.seed(2020)
+
+trainControl &lt;- trainControl(
+  method=&quot;repeatedcv&quot;,       
+  number=10,                  #number of folds
+  repeats=5,                  #number of repeats for each fold
+  savePredictions=&quot;final&quot;,    #Saves predictions for tuning parameter
+  classProbs=TRUE,           
+  allowParallel = TRUE        #allow parallel computing
+  ) 
+#Model List
+algorithmList &lt;- c(&quot;glmboost&quot;,&#39;rpart&#39;,&quot;rf&quot;,&quot;xgbTree&quot;,&quot;naive_bayes&quot;,
+                   &#39;earth&#39;, &#39;kknn&#39;,  
+                   &quot;lda&quot;, &quot;Linda&quot;,&quot;C5.0Tree&quot;,&quot;adaboost&quot;)
+#Train models separately
+models &lt;- caretList(diagnosis~., data=bcancerTrain, 
+          trControl = trainControl, preProcess=c(&quot;center&quot;,&quot;scale&quot;),
+          methodList = algorithmList,metric = &quot;Kappa&quot;)</code></pre>
+<pre><code>## Loading required package: earth</code></pre>
+<pre><code>## Loading required package: Formula</code></pre>
+<pre><code>## Loading required package: plotmo</code></pre>
+<pre><code>## Loading required package: plotrix</code></pre>
+<pre><code>## Loading required package: TeachingDemos</code></pre>
+<pre class="r"><code># Collect resamples and summary of models performances
+results &lt;- resamples(models)
+bwplot(results)</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>So, how do out models perform with the training data? Kappa (or Cohen’s Kappa) tell us how well the classifier performs compared to how well it would have performed simply by chance. So if Kappa=0 the agreement between breast cancer diagnostic decision prediction and reality is just by chance and if Kappa=1 the agreement is perfect. In our case, the best performing algorithm is xgbTree.</p>
+<p>We could improve the model via hyperparameter tuning or by creating ensemble models. We can test the correlation between models, so if correlation is not high we could improve model performance by making ensembles of the model.</p>
+<pre class="r"><code>Modelcorr &lt;- modelCor(results)
+ggcorrplot(Modelcorr, lab = TRUE,title = &quot;Correlation between model results&quot;)</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Great! Models correlation is not very high suggesting that each one may capture a different aspect of the data, and different models may perform best on different subsets of the data so one model may predict correctly cases where the other model predicts incorrectly. Therefore we could try to improve the overall performance combining the predictions of a number of models and making “meta-models” to ensemble collections of predictive models.</p>
+</div>
+<div id="adjust-model-by-making-ensembles-of-caret-models" class="section level3">
+<h3>Adjust model by making ensembles of caret models</h3>
+<p>Similarly to before, we start specifying a <em>new</em> trainControl object and then we can use the <code>caretStack</code> function to create ensemble models from the list of caret models.</p>
+<pre class="r"><code>stackControl &lt;- trainControl(method=&quot;repeatedcv&quot;, 
+                             number=10, repeats=5, 
+                             savePredictions=TRUE, 
+                             classProbs=TRUE,
+                             allowParallel = TRUE
+                             )
+set.seed(2020)
+stack.xgbTree &lt;- caretStack(models, method=&quot;xgbTree&quot;, 
+                        metric=&quot;Kappa&quot;,trControl=stackControl)</code></pre>
+</div>
+<div id="test-ensemble-model-with-test-dataset" class="section level3">
+<h3>Test Ensemble model with test dataset</h3>
+<pre class="r"><code>stack_predicted_xgbTree&lt;- predict(stack.xgbTree, newdata = bcancerTest)
+head(stack_predicted_xgbTree, n = 10)</code></pre>
+<pre><code>##  [1] M M M M B M M M M M
+## Levels: B M</code></pre>
+</div>
+<div id="evaluating-the-model" class="section level3">
+<h3>Evaluating the model</h3>
+<p>We can evaluate the model drawing a confusion matrix to analyzing the different types of errors of each ML model.</p>
+<pre class="r"><code>xgbTree.cmx &lt;- caret::confusionMatrix(stack_predicted_xgbTree, 
+                                  bcancerTest$diagnosis, positive = &quot;B&quot;)
+draw_confusion_matrix(xgbTree.cmx)</code></pre>
+<p><img src="/blog/2020_09_02_ML_Breast_Cancer_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>This confusion matrix shows the performance on prediction of the stack ensemble classification model when new/production data is passed through the model. The accuracy and Kappa show that this model is doing a pretty good job! Kappa for ensemble model is lower than that one for the base xgbTree, but bear in mind that the ensemble model had never seen the new testing data before!</p>
+</div>
+<div id="conclusions" class="section level3">
+<h3>Conclusions</h3>
+<p>We built stacked ensemble model gathered of individual based learners that has a pretty good probability of success when predicting breast cancer diagnosis.</p>
+</div>
+</div>
